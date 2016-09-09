@@ -183,25 +183,25 @@ class c_TDGameHelper extends GameCanvas implements Runnable {
 	private void initAssets() throws IOException{
 		// loads image assets
 		System.out.println("INFORMATION: Loading image assets...");
-		img_Background = Image.createImage("/abs_bkg.png");
-		img_MinionDeathFX = Image.createImage("/fx.png");
-		img_Map = Image.createImage("/map_tiles.png");
-		img_Minion = Image.createImage("/minions.png");
-		img_Placeholder = Image.createImage("/placeholder.png");
-		img_Turret = Image.createImage("/turret.png");
+		img_Background = Image.createImage("/legacy/abs_bkg.png");
+		img_MinionDeathFX = Image.createImage("/legacy/fx.png");
+		img_Map = Image.createImage("/legacy/map_tiles.png");
+		img_Minion = Image.createImage("/legacy/minions.png");
+		img_Placeholder = Image.createImage("/legacy/placeholder.png");
+		img_Turret = Image.createImage("/legacy/turret.png");
 
-		splash_Logo = Image.createImage("/splash_logo.png");
-		splash_Startup = Image.createImage("/splash_startup.png");
-		splash_Menu = Image.createImage("/splash_menu.png");
-		splash_Gameover = Image.createImage("/splash_gameover.png");
+		splash_Logo = Image.createImage("/legacy/splash_logo.png");
+		splash_Startup = Image.createImage("/legacy/splash_startup.png");
+		splash_Menu = Image.createImage("/legacy/splash_menu.png");
+		splash_Gameover = Image.createImage("/legacy/splash_gameover.png");
 		
-		ui_Defeat = Image.createImage("/ui_defeat.png");
-		ui_Header = Image.createImage("/ui_header.png");
-		ui_HUDicons = Image.createImage("/ui_icons.png");
-		ui_HUDcontrols = Image.createImage("/ui_controls.png");
-		ui_Main = Image.createImage("/ui_main.png");
-		ui_Tray = Image.createImage("/ui_tray.png");
-		ui_Victory = Image.createImage("/ui_victory.png");
+		ui_Defeat = Image.createImage("/legacy/ui_defeat.png");
+		ui_Header = Image.createImage("/legacy/ui_header.png");
+		ui_HUDicons = Image.createImage("/legacy/ui_icons.png");
+		ui_HUDcontrols = Image.createImage("/legacy/ui_controls.png");
+		ui_Main = Image.createImage("/legacy/ui_main.png");
+		ui_Tray = Image.createImage("/legacy/ui_tray.png");
+		ui_Victory = Image.createImage("/legacy/ui_victory.png");
 		
 		// creates sprites and map
 		System.out.println("INFORMATION: Creating sprites...");
