@@ -1,7 +1,8 @@
-MIDlet-Version: 1.0
+MIDlet-Version: 2.0
 MIDlet-Vendor: Laszlo Lukacs
 MIDlet-Jar-URL: SpaceSiegeBreakers.jar
-MicroEdition-Configuration: CLDC-1.0
-MIDlet-1: SpaceSiegeBreakers,,pkg_TDGame.c_MIDletHelper
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-2: TDGame-legacy,,pkg_TDGame.c_MIDletHelper
 MicroEdition-Profile: MIDP-2.0
+MIDlet-1: SpaceSiegeBreakers,,hu.laszlolukacs.spacesiegebreakers.SpaceSiegeBreakersMIDlet
 MIDlet-Name: Space Siege Breakers
