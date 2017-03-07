@@ -9,6 +9,7 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.midlet.MIDletStateChangeException;
 
+import hu.laszlolukacs.spacesiegebreakers.Game;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class SplashScreenScene extends GameCanvas implements Scene {
@@ -67,6 +68,8 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 				Font.SIZE_MEDIUM));
 		this.g.drawString("Created by Laszlo Lukacs, 2010", m_centerHorizontal,
 				m_screenHeight - 12, Graphics.BOTTOM | Graphics.HCENTER);
+		
+		super.flushGraphics();
 	}
 
 	private void getInput() {
@@ -77,13 +80,9 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 				- m_timeButtonLastPressed > 300)) {
 			m_timeButtonLastPressed = System.currentTimeMillis();
 
-			// isSplash = false;
-			// isGameover = false;
-			// isMenu = true;
-			// isTheatre = false;
-			// g_GameState = 1;
-
 			// TODO: switch to MainMenuScene
+			Log.i(TAG, "FIRE_PRESSED! - Start game selected");
+			Game.setScene(new MainMenuScene());
 		}
 	}
 }

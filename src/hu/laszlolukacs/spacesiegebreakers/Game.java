@@ -3,6 +3,7 @@ package hu.laszlolukacs.spacesiegebreakers;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 
+import hu.laszlolukacs.spacesiegebreakers.scenes.MainMenuScene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.Scene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.SplashScreenScene;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
@@ -59,6 +60,9 @@ public class Game implements Runnable {
 						Thread.sleep(
 								CYCLE_TIME_THRESHOLD - Game.cycleCompleteTime);
 					} catch (InterruptedException e) {
+						Log.e(TAG,
+								"Game thread has been interrupted, reason: " + e.getMessage());
+						e.printStackTrace();
 						this.stop();
 					}
 				}
@@ -83,11 +87,15 @@ public class Game implements Runnable {
 	public void stop() {
 		Game.isRunning = false;
 	}
+	
+	public static void setScene(Scene scene) {
+		scene.init();
+		Game.currentScene = scene;
+		Game.display.setCurrent((Displayable) Game.currentScene);
+	}
 
 	private static void init() {
-		Game.currentScene = new SplashScreenScene();
-		Game.currentScene.init();
-		Game.display.setCurrent((Displayable) Game.currentScene);
+		Game.setScene(new SplashScreenScene());
 	}
 
 	/**
