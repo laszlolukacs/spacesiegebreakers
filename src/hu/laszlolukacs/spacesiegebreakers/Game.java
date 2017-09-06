@@ -2,6 +2,7 @@ package hu.laszlolukacs.spacesiegebreakers;
 
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.midlet.MIDlet;
 
 import hu.laszlolukacs.spacesiegebreakers.scenes.MainMenuScene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.Scene;
@@ -24,13 +25,15 @@ public class Game implements Runnable {
 
 	public static Scene currentScene;
 	public static Display display;
+	public static SpaceSiegeBreakersMIDlet midlet;
 
 	/**
 	 * Initializes a new instance of the `Game` class.
 	 * 
 	 * @author laszlolukacs
 	 */
-	public Game(Display display) {
+	public Game(SpaceSiegeBreakersMIDlet midlet, Display display) {
+		Game.midlet = midlet;
 		Game.display = display;
 	}
 
@@ -95,7 +98,7 @@ public class Game implements Runnable {
 	}
 
 	private static void init() {
-		Game.setScene(new SplashScreenScene());
+		Game.setScene(new SplashScreenScene(Game.midlet));
 	}
 
 	/**

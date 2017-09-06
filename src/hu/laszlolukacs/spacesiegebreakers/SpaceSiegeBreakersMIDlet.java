@@ -1,10 +1,9 @@
 /**
- * 
+ * See LICENSE for details.
  */
 package hu.laszlolukacs.spacesiegebreakers;
 
 import javax.microedition.lcdui.Display;
-import javax.microedition.lcdui.Displayable;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
@@ -41,18 +40,16 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 		try {
 			if (this.game == null) {
 				Log.i(TAG, "MIDlet starting up...");
-				this.game = new Game(this.display);
+				this.game = new Game(this, this.display);
 			} else {
 				Log.i(TAG, "MIDlet restored.");
 			}
 
 			this.game.start();
-		} catch (Exception ex) {
-			Log.e(TAG, "Failed to start MIDlet, reason: " + ex.getMessage());
-			ex.printStackTrace();
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to start MIDlet, reason: " + e.getMessage());
+			e.printStackTrace();
 		}
-
-		// dgDisp.setCurrent(instance);
 	}
 
 	/**
@@ -77,6 +74,20 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 		if (this.game != null) {
 			this.game.stop();
 		}
+	}
+
+	/*
+	 * Cleans up and notifies that the MIDlet has been destroyed.
+	 */
+	public void exit() {
+		try {
+			this.destroyApp(false);
+		} catch (MIDletStateChangeException e) {
+			Log.e(TAG, "Failed to destroy MIDlet, reason: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		this.notifyDestroyed();
 	}
 
 	/**
