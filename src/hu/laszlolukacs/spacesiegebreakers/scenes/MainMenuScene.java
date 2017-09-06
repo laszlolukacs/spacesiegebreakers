@@ -10,6 +10,8 @@ import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 import javax.microedition.midlet.MIDletStateChangeException;
 
+import hu.laszlolukacs.spacesiegebreakers.Game;
+import hu.laszlolukacs.spacesiegebreakers.SpaceSiegeBreakersMIDlet;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class MainMenuScene extends GameCanvas implements Scene {
@@ -20,6 +22,7 @@ public class MainMenuScene extends GameCanvas implements Scene {
 	private int m_screenWidth, m_screenHeight, m_centerHorizontal,
 			m_centerVertical, m_cornerX, m_cornerY;
 
+	private SpaceSiegeBreakersMIDlet midlet;
 	private Graphics g;
 	private LayerManager layMan_Menu;
 	private Sprite[] spr_UI_menu = new Sprite[2];
@@ -31,9 +34,9 @@ public class MainMenuScene extends GameCanvas implements Scene {
 	private String[] sz_MenuLabels;
 	private int menu_OptionSelectedIndex = 0;
 
-	public MainMenuScene() {
+	public MainMenuScene(SpaceSiegeBreakersMIDlet midlet) {
 		super(true);
-		// TODO Auto-generated constructor stub
+		this.midlet = midlet;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
 		this.m_screenHeight = super.getHeight(); // height of the LCD
@@ -109,7 +112,7 @@ public class MainMenuScene extends GameCanvas implements Scene {
 		this.g.drawString("v1.0", this.m_screenWidth, this.m_screenHeight,
 				Graphics.BOTTOM | Graphics.RIGHT);
 		layMan_Menu.paint(this.g, 0, 0);
-		
+
 		super.flushGraphics();
 	}
 
@@ -146,18 +149,12 @@ public class MainMenuScene extends GameCanvas implements Scene {
 					// isGameover = false;
 					// isTheatre = true;
 					// g_GameState = 0;
+					Game.setScene(new GameScene(this.midlet));
 					break;
 				case 1:
 					Log.i(TAG, "FIRE_PRESSED! - Exit selected");
-					// TODO: close the MIDlet
-					// try {
-					// manager.destroyApp(true);
-					// }
-					// catch (MIDletStateChangeException e) {
-					// e.printStackTrace();
-					// }
-					// manager.notifyDestroyed();
-					// break;
+					this.midlet.exit();
+					break;
 				}
 			}
 		}
