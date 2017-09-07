@@ -22,14 +22,16 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 			m_centerVertical, m_cornerX, m_cornerY;
 	
 	private SpaceSiegeBreakersMIDlet midlet;
+	private Display display;
 	private Graphics g;
 
 	private Image logoImage;
 	private Image backgroundImage;
 
-	public SplashScreenScene(SpaceSiegeBreakersMIDlet midlet) {
+	public SplashScreenScene(SpaceSiegeBreakersMIDlet midlet, Display display) {
 		super(true);
 		this.midlet = midlet;
+		this.display = display;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
 		this.m_screenHeight = super.getHeight(); // height of the LCD
@@ -86,7 +88,7 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 
 			// TODO: switch to MainMenuScene
 			Log.i(TAG, "FIRE_PRESSED! - Start game selected");
-			Game.setScene(new MainMenuScene(this.midlet));
+			Game.setScene(new MainMenuScene(this.midlet, this.display));
 		}
 	}
 }

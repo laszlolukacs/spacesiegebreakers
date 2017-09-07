@@ -28,6 +28,16 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	public SpaceSiegeBreakersMIDlet() {
 		Log.i(TAG,
 				"Space Siege Breakers for J2ME, created by Laszlo Lukacs 2010, 2017");
+		
+		// Get current size of heap in bytes
+		long heapSize = Runtime.getRuntime().totalMemory();
+		
+		// Get amount of free memory within the heap in bytes. This size will increase
+		// after garbage collection and decrease as new objects are created.
+		long heapFreeSize = Runtime.getRuntime().freeMemory();
+		
+		Log.i(TAG, "Free memory/heap size: " + heapFreeSize + "/" + heapSize + " bytes");
+		
 		this.display = Display.getDisplay(this);
 	}
 
@@ -76,7 +86,7 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 		}
 	}
 
-	/*
+	/**
 	 * Cleans up and notifies that the MIDlet has been destroyed.
 	 */
 	public void exit() {

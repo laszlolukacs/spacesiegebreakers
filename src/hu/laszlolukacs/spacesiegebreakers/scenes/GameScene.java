@@ -2,6 +2,7 @@ package hu.laszlolukacs.spacesiegebreakers.scenes;
 
 import java.io.IOException;
 
+import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
@@ -9,7 +10,6 @@ import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 import javax.microedition.lcdui.game.TiledLayer;
-import javax.microedition.midlet.MIDletStateChangeException;
 
 import hu.laszlolukacs.spacesiegebreakers.SpaceSiegeBreakersMIDlet;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
@@ -18,13 +18,38 @@ public class GameScene extends GameCanvas implements Scene {
 	public static final String TAG = "GameScene";
 
 	private SpaceSiegeBreakersMIDlet midlet;
+	private Display display;
 	private Graphics g;
 
 	private long m_timeButtonLastPressed = 0;
 
 	private int m_screenWidth, m_screenHeight, m_centerHorizontal,
 			m_centerVertical, m_cornerX, m_cornerY;
+	
+	private int[] num_DeathFXFrameCounter;
 
+	// game state descriptors
+	private volatile boolean isRunning;
+	private volatile boolean isWave;
+	private volatile boolean isGameover;
+	private boolean isVictory;
+	private boolean isThereAnyMinionAlive;
+	private int g_GameState = 0;
+	private int currWaveNumber;
+	private int currWaveMinionHealth;
+	private int currWaveMinionReward;
+	private int playerCredits;
+	private int playerLives;
+	private int playerScore;
+	private long timeWaveStart;
+	
+	// game element descriptors
+	// defining map, turrets' damage, minons' health, minions move direction
+	private int[] g_turretDmg, g_minionHth, moveDirection; // the direction of the minions movement, left: 1, right: 2, up: 3, down: 4
+	private int g_turretNum, g_minionNum; 	// number of turrets, minions
+	private long timeSpawnCondition; 	// minion spawning cooldown time
+	private long[] timeTurretLastShoot;	// turret cooldown time
+	
 	// graphics assets
 	private LayerManager layMan_Game;
 	private LayerManager layMan_UI;
@@ -77,9 +102,10 @@ public class GameScene extends GameCanvas implements Scene {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		};
 
-	public GameScene(SpaceSiegeBreakersMIDlet midlet) {
+	public GameScene(SpaceSiegeBreakersMIDlet midlet, Display display) {
 		super(true);
 		this.midlet = midlet;
+		this.display = display;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
 		this.m_screenHeight = super.getHeight(); // height of the LCD
@@ -181,6 +207,21 @@ public class GameScene extends GameCanvas implements Scene {
 				this.spr_UI_controls[2].nextFrame();
 			}
 			
+			// game state descriptors
+			isRunning = false;
+			isGameover = false;
+			isVictory = false;
+			g_GameState = 18;
+			isWave = false;
+			isUIControlsMoving = false;
+			isUIControlsMovingToLeft = false;
+			isThereAnyMinionAlive = true;
+			timeWaveStart = 0;
+			currWaveMinionHealth = 10;
+			currWaveMinionReward = 1;
+			currWaveNumber = 0;
+			
+			num_DeathFXFrameCounter = new int[20];
 			sz_Credits = new String("40");
 			sz_Lives = new String("20");
 			sz_Score = new String("0");
@@ -208,10 +249,87 @@ public class GameScene extends GameCanvas implements Scene {
 	public void update() {
 		// TODO Auto-generated method stub
 		this.getInput();
+		
+		
+		
+		if(isUIControlsMoving){
+			ui_SliderCounter++;
+			if(isUIControlsMovingToLeft && (spr_UI_controls[0].getX() > 32)){
+				for(int i = 0; i < 3; i++){
+					spr_UI_controls[i].setPosition(spr_UI_controls[i].getX() - 4, spr_UI_controls[i].getY());
+				}
+			}
+			else if(!isUIControlsMovingToLeft && (spr_UI_controls[2].getX() < this.m_screenWidth - 32)){
+				for(int i = 0; i < 3; i++){
+					spr_UI_controls[i].setPosition(spr_UI_controls[i].getX() + 4, spr_UI_controls[i].getY());
+				}
+			}
+			if(ui_SliderCounter == 8){
+				isUIControlsMoving = false;
+				ui_SliderCounter = 0;
+			}
+		}
+		if(!isGameover){
+			timeSpawnCondition = (System.currentTimeMillis() - timeWaveStart) / 500;
+			if(timeSpawnCondition > 20)
+				timeSpawnCondition = 20;
+			for(int i = 0; i < 20; i++){
+				if(spr_FX[i].isVisible() && num_DeathFXFrameCounter[i] < 5){
+					spr_FX[i].nextFrame();
+					num_DeathFXFrameCounter[i]++;
+				}
+				else{
+					spr_FX[i].setVisible(false);
+				}
+			}
+			if(isWave){
+//				if(checkPath()){
+//					this.display.vibrate(166);
+//					playerLives--;
+//				}
+				if(playerLives <= 0){
+					isWave = false;
+					isGameover = true;
+					g_GameState = 19;
+				}
+				else if(playerLives < 6){
+					ui_CurrentMessageIndex = 6;
+				}
+
+				if(g_turretNum != 0){
+//					rangeCheck();
+				}
+				if(isThereAnyMinionAlive == false){
+					isWave = false;
+					System.out.println("INFORMATION: Wave no. " + currWaveNumber + " completed!");
+					if(currWaveNumber == 10){
+						isWave = false;
+						isVictory = true;
+						isGameover = false;
+						g_GameState = 19;
+					}
+					else{
+						// TODO
+						ui_CurrentMessageIndex = 5;
+					}
+				}
+				Integer tmp = new Integer(playerCredits);
+				sz_Credits = tmp.toString();
+				tmp = new Integer(playerLives);
+				sz_Lives = tmp.toString();
+				tmp = new Integer(playerScore);
+				sz_Score = tmp.toString();
+				
+			}
+		}
+		// helps drawing the info on the HUD
+		Integer tmp = new Integer(playerCredits);
+		sz_Credits = tmp.toString();
+		tmp = new Integer(playerScore);
+		sz_Score = tmp.toString();
 	}
 
 	public void render() {
-		// TODO Auto-generated method stub
 		// draws the starscape background
 		this.g.drawImage(img_Background, m_centerHorizontal, m_centerVertical,
 				Graphics.VCENTER | Graphics.HCENTER);
@@ -239,12 +357,9 @@ public class GameScene extends GameCanvas implements Scene {
 	}
 
 	private void getInput() {
-		int keyStates = super.getKeyStates();
+		int keyStates = super.getKeyStates();		
 		
-		int g_GameState = 0;
-		
-		
-		switch(g_GameState){
+		switch(this.g_GameState){
 		// base state for a running game, listening for main controls
 		case 0:
 			if(System.currentTimeMillis() - m_timeButtonLastPressed > 166) {
