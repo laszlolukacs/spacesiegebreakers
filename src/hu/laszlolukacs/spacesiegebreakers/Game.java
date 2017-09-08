@@ -2,9 +2,7 @@ package hu.laszlolukacs.spacesiegebreakers;
 
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.midlet.MIDlet;
 
-import hu.laszlolukacs.spacesiegebreakers.scenes.MainMenuScene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.Scene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.SplashScreenScene;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
@@ -29,24 +27,20 @@ public class Game implements Runnable {
 
 	/**
 	 * Initializes a new instance of the `Game` class.
-	 * 
-	 * @author laszlolukacs
 	 */
 	public Game(SpaceSiegeBreakersMIDlet midlet, Display display) {
 		Game.midlet = midlet;
 		Game.display = display;
 	}
 
-	// specifies the target running speed in ~ms / frame
-	// e.g. 20 ms / frame = 50 fps
-	private static final long CYCLE_TIME_THRESHOLD = 20; // ms / frame
+	// specifies the target speed in ~ms / frame, e.g. 20 ms / frame = 50 fps
+	private static final long CYCLE_TIME_THRESHOLD = 20; // ms / frame = 50 fps
 
+	/**
+	 * Executes the game's core main loop.
+	 */
 	public void run() {
-		Log.i(TAG, "Loading game resources...");
-		Game.init();
-
-		Log.i(TAG, "Main game loop is starting...");
-		// Graphics g = getGraphics();
+		Log.i(TAG, "Entering the main game loop.");
 		// main loop of the game
 		while (Game.isRunning) {
 			Game.cycleStartTime = System.currentTimeMillis();
@@ -54,24 +48,20 @@ public class Game implements Runnable {
 			Game.render(); // renders a frame
 
 			// makes the thread sleep if the game cycle finishes on time
-			Game.cycleCompleteTime = System.currentTimeMillis()
-					- Game.cycleStartTime;
+			Game.cycleCompleteTime = System.currentTimeMillis()	- Game.cycleStartTime;
 			Game.framesPerSec = 1000 / (cycleCompleteTime + 1);
 			if (Game.cycleCompleteTime < CYCLE_TIME_THRESHOLD) {
 				synchronized (this) {
 					try {
-						Thread.sleep(
-								CYCLE_TIME_THRESHOLD - Game.cycleCompleteTime);
+						Thread.sleep(CYCLE_TIME_THRESHOLD - Game.cycleCompleteTime);
 					} catch (InterruptedException e) {
-						Log.e(TAG,
-								"Game thread has been interrupted, reason: " + e.getMessage());
+						Log.e(TAG, "Game thread has been interrupted, reason: "	+ e.getMessage());
 						e.printStackTrace();
 						this.stop();
 					}
 				}
 			} else {
-				Log.w(TAG,
-						"Game cycle time threshold has been hit! (fps < 50)");
+				Log.w(TAG, "Game cycle time threshold has been hit! (fps < 50)");
 				Thread.yield();
 			}
 		}
@@ -80,6 +70,9 @@ public class Game implements Runnable {
 		this.stop();
 	}
 
+	/**
+	 * Starts the main loop.
+	 */
 	public void start() {
 		Game.init();
 		Game.isRunning = true;
@@ -87,18 +80,30 @@ public class Game implements Runnable {
 		gameThread.start();
 	}
 
+	/**
+	 * Stops the main loop.
+	 */
 	public void stop() {
 		Game.isRunning = false;
 	}
-	
+
+	/**
+	 * Sets the current game scene to the specified one.
+	 * 
+	 * @param scene
+	 *            The scene to be set.
+	 */
 	public static void setScene(Scene scene) {
 		scene.init();
 		Game.currentScene = scene;
 		Game.display.setCurrent((Displayable) Game.currentScene);
 	}
 
+	/**
+	 * Initializes any required resources.
+	 */
 	private static void init() {
-		Game.setScene(new SplashScreenScene(Game.midlet));
+		Game.setScene(new SplashScreenScene(Game.midlet, Game.display));
 	}
 
 	/**
