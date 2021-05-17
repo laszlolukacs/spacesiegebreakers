@@ -11,14 +11,12 @@ import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 import javax.microedition.lcdui.game.TiledLayer;
 
-import hu.laszlolukacs.spacesiegebreakers.SpaceSiegeBreakersMIDlet;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class GameScene extends GameCanvas implements Scene {
 	public static final String TAG = "GameScene";
 
-	private SpaceSiegeBreakersMIDlet midlet;
-	private Display display;
+	private final Display display;
 	private Graphics g;
 
 	private long m_timeButtonLastPressed = 0;
@@ -102,9 +100,8 @@ public class GameScene extends GameCanvas implements Scene {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		};
 
-	public GameScene(SpaceSiegeBreakersMIDlet midlet, Display display) {
+	public GameScene(final Display display) {
 		super(true);
-		this.midlet = midlet;
 		this.display = display;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
@@ -211,7 +208,7 @@ public class GameScene extends GameCanvas implements Scene {
 			isRunning = false;
 			isGameover = false;
 			isVictory = false;
-			g_GameState = 18;
+			g_GameState = 0;
 			isWave = false;
 			isUIControlsMoving = false;
 			isUIControlsMovingToLeft = false;
@@ -235,7 +232,7 @@ public class GameScene extends GameCanvas implements Scene {
 			sz_CurrentInfo[6] = new String("WARNING! Defeat imminent");
 			
 			if(Log.getEnabled()) {			
-				Log.i(TAG, "Load complete."); 
+				Log.i(TAG, "Loading complete."); 
 			}
 		} catch (IOException ioex) {
 			if (Log.getEnabled()) {
@@ -249,9 +246,7 @@ public class GameScene extends GameCanvas implements Scene {
 	public void update() {
 		// TODO Auto-generated method stub
 		this.getInput();
-		
-		
-		
+				
 		if(isUIControlsMoving){
 			ui_SliderCounter++;
 			if(isUIControlsMovingToLeft && (spr_UI_controls[0].getX() > 32)){
