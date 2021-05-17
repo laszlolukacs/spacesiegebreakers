@@ -2,15 +2,12 @@ package hu.laszlolukacs.spacesiegebreakers.scenes;
 
 import java.io.IOException;
 
-import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.GameCanvas;
-import javax.microedition.midlet.MIDletStateChangeException;
 
 import hu.laszlolukacs.spacesiegebreakers.Game;
-import hu.laszlolukacs.spacesiegebreakers.SpaceSiegeBreakersMIDlet;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class SplashScreenScene extends GameCanvas implements Scene {
@@ -21,17 +18,13 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 	private int m_screenWidth, m_screenHeight, m_centerHorizontal,
 			m_centerVertical, m_cornerX, m_cornerY;
 	
-	private SpaceSiegeBreakersMIDlet midlet;
-	private Display display;
 	private Graphics g;
 
 	private Image logoImage;
 	private Image backgroundImage;
 
-	public SplashScreenScene(SpaceSiegeBreakersMIDlet midlet, Display display) {
+	public SplashScreenScene() {
 		super(true);
-		this.midlet = midlet;
-		this.display = display;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
 		this.m_screenHeight = super.getHeight(); // height of the LCD
@@ -88,7 +81,8 @@ public class SplashScreenScene extends GameCanvas implements Scene {
 
 			// TODO: switch to MainMenuScene
 			Log.i(TAG, "FIRE_PRESSED! - Start game selected");
-			Game.setScene(new MainMenuScene(this.midlet, this.display));
+			Scene nextScene = SceneFactory.createSceneByKey(SceneKeys.MAIN_MENU);
+			Game.setScene(nextScene);
 		}
 	}
 }

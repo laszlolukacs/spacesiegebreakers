@@ -23,8 +23,6 @@ public class MainMenuScene extends GameCanvas implements Scene {
 	private int m_screenWidth, m_screenHeight, m_centerHorizontal,
 			m_centerVertical, m_cornerX, m_cornerY;
 
-	private SpaceSiegeBreakersMIDlet midlet;
-	private Display display;
 	private Graphics g;
 	private LayerManager layMan_Menu;
 	private Sprite[] spr_UI_menu = new Sprite[2];
@@ -36,10 +34,8 @@ public class MainMenuScene extends GameCanvas implements Scene {
 	private String[] sz_MenuLabels;
 	private int menu_OptionSelectedIndex = 0;
 
-	public MainMenuScene(SpaceSiegeBreakersMIDlet midlet, Display display) {
+	public MainMenuScene() {
 		super(true);
-		this.midlet = midlet;
-		this.display = display;
 		this.g = super.getGraphics();
 		this.m_screenWidth = super.getWidth(); // width of the LCD
 		this.m_screenHeight = super.getHeight(); // height of the LCD
@@ -146,17 +142,13 @@ public class MainMenuScene extends GameCanvas implements Scene {
 				case 0:
 					m_timeButtonLastPressed = System.currentTimeMillis();
 					Log.i(TAG, "FIRE_PRESSED! - Start game selected");
-					// TODO: start the game
-					// isSplash = false;
-					// isMenu = false;
-					// isGameover = false;
 					// isTheatre = true;
-					// g_GameState = 0;
-					Game.setScene(new GameScene(this.midlet, this.display));
+					Scene nextScene = SceneFactory.createSceneByKey(SceneKeys.GAME_SCENE);
+					Game.setScene(nextScene);
 					break;
 				case 1:
 					Log.i(TAG, "FIRE_PRESSED! - Exit selected");
-					this.midlet.exit();
+					Game.quit();
 					break;
 				}
 			}

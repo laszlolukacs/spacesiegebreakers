@@ -12,33 +12,32 @@ import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 /**
  * The methods of this class allow the underlying system application management
  * software to create, start, pause, and destroy the `SpaceSiegeBreakersMIDlet`
- * MID Profile application.
+ * application.
  * 
  * @author laszlolukacs
  */
 public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	public static final String TAG = "SpaceSiegeBreakersMIDlet";
 
-	private Display display;
+	private final Display display;
 	private Game game;
 
-	/**
-	 * Initializes a new instance of the `SpaceSiegeBreakersMIDlet` class.
-	 */
 	public SpaceSiegeBreakersMIDlet() {
 		Log.i(TAG,
 				"Space Siege Breakers for J2ME, created by Laszlo Lukacs 2010, 2017");
-		
+
+		this.display = Display.getDisplay(this);
+
 		// Get current size of heap in bytes
 		long heapSize = Runtime.getRuntime().totalMemory();
-		
-		// Get amount of free memory within the heap in bytes. This size will increase
-		// after garbage collection and decrease as new objects are created.
+
+		// Get amount of free memory within the heap in bytes. This size will
+		// increase after garbage collection and decrease as new objects are
+		// created.
 		long heapFreeSize = Runtime.getRuntime().freeMemory();
-		
-		Log.i(TAG, "Free memory/heap size: " + heapFreeSize + "/" + heapSize + " bytes");
-		
-		this.display = Display.getDisplay(this);
+
+		Log.i(TAG, "Free memory/heap size: " + heapFreeSize + "/" + heapSize
+				+ " bytes");
 	}
 
 	/**
@@ -55,7 +54,7 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 				Log.i(TAG, "MIDlet restored.");
 			}
 
-			this.game.start();
+			this.game.startLoop();
 		} catch (Exception e) {
 			Log.e(TAG, "Failed to start MIDlet, reason: " + e.getMessage());
 			e.printStackTrace();
@@ -68,9 +67,7 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	 * @see javax.microedition.midlet.MIDlet#pauseApp()
 	 */
 	protected void pauseApp() {
-		// TODO Auto-generated method stub
-		Log.i(TAG, "Application paused!");
-
+		Log.i(TAG, "MIDlet paused");
 	}
 
 	/**
@@ -82,7 +79,7 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 			throws MIDletStateChangeException {
 		Log.i(TAG, "MIDlet shutting down...");
 		if (this.game != null) {
-			this.game.stop();
+			this.game.stopLoop();
 		}
 	}
 
