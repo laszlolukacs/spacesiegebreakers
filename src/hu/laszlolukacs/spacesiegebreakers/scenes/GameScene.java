@@ -1,3 +1,7 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.scenes;
 
 import java.io.IOException;
@@ -11,6 +15,7 @@ import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 import javax.microedition.lcdui.game.TiledLayer;
 
+import hu.laszlolukacs.spacesiegebreakers.Game;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class GameScene extends GameCanvas implements Scene {
@@ -32,7 +37,7 @@ public class GameScene extends GameCanvas implements Scene {
 	private volatile boolean isGameover;
 	private boolean isVictory;
 	private boolean isThereAnyMinionAlive;
-	private int g_GameState = 0;
+	private int gameState = 0;
 	private int currWaveNumber;
 	private int currWaveMinionHealth;
 	private int currWaveMinionReward;
@@ -208,7 +213,7 @@ public class GameScene extends GameCanvas implements Scene {
 			isRunning = false;
 			isGameover = false;
 			isVictory = false;
-			g_GameState = 0;
+			gameState = 0;
 			isWave = false;
 			isUIControlsMoving = false;
 			isUIControlsMovingToLeft = false;
@@ -243,7 +248,7 @@ public class GameScene extends GameCanvas implements Scene {
 		}
 	}
 
-	public void update() {
+	public void update(final long delta) {
 		// TODO Auto-generated method stub
 		this.getInput();
 				
@@ -285,7 +290,7 @@ public class GameScene extends GameCanvas implements Scene {
 				if(playerLives <= 0){
 					isWave = false;
 					isGameover = true;
-					g_GameState = 19;
+					gameState = 19;
 				}
 				else if(playerLives < 6){
 					ui_CurrentMessageIndex = 6;
@@ -301,7 +306,7 @@ public class GameScene extends GameCanvas implements Scene {
 						isWave = false;
 						isVictory = true;
 						isGameover = false;
-						g_GameState = 19;
+						gameState = 19;
 					}
 					else{
 						// TODO
@@ -324,7 +329,7 @@ public class GameScene extends GameCanvas implements Scene {
 		sz_Score = tmp.toString();
 	}
 
-	public void render() {
+	public void render(final long delta) {
 		// draws the starscape background
 		this.g.drawImage(img_Background, m_centerHorizontal, m_centerVertical,
 				Graphics.VCENTER | Graphics.HCENTER);
@@ -354,7 +359,7 @@ public class GameScene extends GameCanvas implements Scene {
 	private void getInput() {
 		int keyStates = super.getKeyStates();		
 		
-		switch(this.g_GameState){
+		switch(this.gameState){
 		// base state for a running game, listening for main controls
 		case 0:
 			if(System.currentTimeMillis() - m_timeButtonLastPressed > 166) {
@@ -381,23 +386,30 @@ public class GameScene extends GameCanvas implements Scene {
 					isUIControlsMoving = false;
 					isUIControlsMovingToLeft = false;
 					switch(ui_ControlSelectedIndex){
-//					case 0:
-//						spr_Placeholder.setVisible(true);
-//						g_GameState = 7;
-//						ui_CurrentMessageIndex = 3;
-//						break;
-//					case 1:
-//						if(!isWave)
-//						g_GameState = 6;
-//						break;
-//					case 2:
-//						g_GameState = 1;
+					case 0:
+						// build a turret
+						spr_Placeholder.setVisible(true);
+						gameState = 7;
+						ui_CurrentMessageIndex = 3;
+						break;
+					case 1:
+						// call in the next wave
+						if(!isWave)
+						gameState = 6;
+						break;
+					case 2:
+						// go back to main menu
+						gameState = 1;
+						Scene nextScene = SceneFactory
+								.createSceneByKey(SceneFactory.MAIN_MENU);
+						Game.setScene(nextScene);
+						
 //						reset();
 //						isMenu = true;
 //						isSplash = false;
 //						isGameover = false;
 //						isTheatre = false;
-//						break;
+						break;
 					}
 				}
 			}

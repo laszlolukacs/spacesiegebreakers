@@ -1,11 +1,15 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers;
 
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.game.GameCanvas;
 
 import hu.laszlolukacs.spacesiegebreakers.scenes.Scene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.SceneFactory;
-import hu.laszlolukacs.spacesiegebreakers.scenes.SceneKeys;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 /**
@@ -14,22 +18,21 @@ import hu.laszlolukacs.spacesiegebreakers.utils.Log;
  * 
  * @author laszlolukacs
  */
-public class Game implements Runnable {
+public class Game extends GameCanvas implements Runnable {
+	
 	public static final String TAG = "Game";
 
 	// specifies the target speed in ~ms / frame, e.g. 33 ms / frame = 30 fps
 	private static final long CYCLE_TIME_THRESHOLD = 33; // ms / frame = 30 fps
 
-	private static long framesPerSec;
-	private boolean isRunning = false;
-	private long cycleStartTime;
-	private long cycleCompleteTime;
+	private volatile boolean isRunning = false;
 
 	public static Scene currentScene;
 	public static Display display;
 	public static SpaceSiegeBreakersMIDlet midlet;
 
 	public Game(SpaceSiegeBreakersMIDlet midlet, Display display) {
+		super(true);
 		Game.midlet = midlet;
 		Game.display = display;
 	}
@@ -39,19 +42,23 @@ public class Game implements Runnable {
 	 */
 	public void run() {
 		Log.i(TAG, "Entering the main game loop.");
+		long cycleCompleteTime = System.currentTimeMillis();
+		
 		// main loop of the game
 		while (isRunning) {
-			cycleStartTime = System.currentTimeMillis();
-			currentScene.update();
-			currentScene.render();
+			final long cycleStartTime = System.currentTimeMillis();
+			long delta = System.currentTimeMillis() - cycleCompleteTime;
+			currentScene.update(delta);
+			delta = System.currentTimeMillis() - cycleCompleteTime;
+			currentScene.render(delta);
 
 			// makes the thread sleep if the game cycle finishes on time
-			cycleCompleteTime = System.currentTimeMillis() - cycleStartTime;
-			framesPerSec = 1000 / (cycleCompleteTime + 1);
-			if (cycleCompleteTime < CYCLE_TIME_THRESHOLD) {
+			cycleCompleteTime = System.currentTimeMillis();
+			long cycleTime = cycleCompleteTime - cycleStartTime;
+			if (cycleTime < CYCLE_TIME_THRESHOLD) {
 				synchronized (this) {
 					try {
-						Thread.sleep(CYCLE_TIME_THRESHOLD - cycleCompleteTime);
+						Thread.sleep(CYCLE_TIME_THRESHOLD - cycleTime);
 					} catch (InterruptedException e) {
 						Log.e(TAG, "Game thread has been interrupted, reason: "
 								+ e.getMessage());
@@ -71,7 +78,7 @@ public class Game implements Runnable {
 	}
 
 	public void startLoop() {
-		setScene(SceneFactory.createSceneByKey(SceneKeys.SPLASH_SCREEN));
+		setScene(SceneFactory.createSceneByKey(SceneFactory.SPLASH_SCREEN));
 		isRunning = true;
 		Thread gameThread = new Thread(this);
 		gameThread.start();
@@ -90,18 +97,4 @@ public class Game implements Runnable {
 	public static void quit() {
 		midlet.exit();
 	}
-
-	// /**
-	// * Allows the game to gather input and update the game state.
-	// */
-	// private static void update() {
-	// currentScene.update();
-	// }
-	//
-	// /**
-	// * Draws a frame based on the current game state.
-	// */
-	// private static void render() {
-	// currentScene.render();
-	// }
 }

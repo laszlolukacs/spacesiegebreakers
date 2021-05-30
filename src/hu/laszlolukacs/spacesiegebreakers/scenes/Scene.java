@@ -1,20 +1,16 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.scenes;
 
+import hu.laszlolukacs.spacesiegebreakers.Drawable;
+import hu.laszlolukacs.spacesiegebreakers.Updateable;
+
 /**
- * 
- * 
- * @author laszlolukacs
+ * Defines the contracts for the game scenes.
  */
-public interface Scene {
+public interface Scene extends Updateable, Drawable {
+
 	void init();
-	
-	/**
-	 * Allows the scene to gather input and update the game state.
-	 */
-	void update();
-	
-	/**
-	 * Draws a frame based on the current scene state.
-	 */
-	void render();
 }
