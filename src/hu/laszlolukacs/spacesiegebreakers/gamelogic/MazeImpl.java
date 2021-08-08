@@ -4,14 +4,15 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.Layer;
 import javax.microedition.lcdui.game.TiledLayer;
 
-public class MazeImpl implements Maze {
+public class MazeImpl {
+	
 	private static final int MAZE_WIDTH = 16;
 	private static final int MAZE_HEIGHT = 17;
 	
 	/**
 	 * This array indicates which sprite tiles should be used to draw the maze. 
 	 */
-	private byte[] terrainTileIndices = new byte[] { // 16x17
+	private final byte[] terrainTileIndices = new byte[] { // 16x17
 			0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0,
@@ -34,7 +35,7 @@ public class MazeImpl implements Maze {
 	/**
 	 * This array indicates where could be the turrets and the minions located within the maze.
 	 */
-	private byte[] terrainHeight = new byte[] { // 16x17
+	private final byte[] terrainHeight = new byte[] { // 16x17
 			0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
@@ -54,26 +55,14 @@ public class MazeImpl implements Maze {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		};
 	
-	private Image terrainTiles = null;
-	private Layer terrainLayer = null;
-
-	public void setTerrainTileIndices(byte[] terrainTileIndices) {
-		if(terrainTileIndices.length != MazeImpl.MAZE_WIDTH * MazeImpl.MAZE_HEIGHT) {
-			throw new IllegalStateException("`terrainTileIndices.lenght` must match the required maze length.");
-		}
-		
-		this.terrainTileIndices = terrainTileIndices;
-		this.terrainLayer = this.createTiledLayer(MazeImpl.MAZE_WIDTH, MazeImpl.MAZE_HEIGHT, this.terrainTiles, this.terrainTileIndices);
-	}
+	private final Image terrainTiles;
+	private final Layer terrainLayer;
 	
-	public void setTerrainTileImage(Image terrainTiles) {
+	public MazeImpl(final Image terrainTiles) {
 		this.terrainTiles = terrainTiles;
+		this.terrainLayer = this.createTiledLayer(this.terrainTiles);
 	}
 
-	public void setTerrainHeights(byte[] terrainHeights) {
-		this.terrainHeight = terrainHeights;
-	}
-	
 	public byte getHeightAt(int x, int y) {
 		// limits+validates the input
 		x = Math.max(0, x);
@@ -86,19 +75,17 @@ public class MazeImpl implements Maze {
 	}
 
 	public Layer getDrawableLayer() {
-		if(this.terrainLayer == null) {
-			this.terrainLayer = this.createTiledLayer(MazeImpl.MAZE_WIDTH, MazeImpl.MAZE_HEIGHT, this.terrainTiles, this.terrainTileIndices);
-		}
-		
 		return this.terrainLayer;
 	}
 	
-	private Layer createTiledLayer(int width, int height, Image terrainTiles, byte[] terrainTileIndices) {
-		Layer tiledLayer = new TiledLayer(width, height, terrainTiles, 10, 10);
+	private Layer createTiledLayer(Image terrainTiles) {
+		final int width = MAZE_WIDTH;
+		final int height = MAZE_HEIGHT;
+		final TiledLayer tiledLayer = new TiledLayer(width, height, terrainTiles, 10, 10);
 		for (int i = 0; i < terrainTileIndices.length; i++) {
 			int column = i % width;
 			int row = (i - column) / (height - 1);
-			((TiledLayer) tiledLayer).setCell(column, row, terrainTileIndices[i]);
+			tiledLayer.setCell(column, row, terrainTileIndices[i]);
 		}
 		
 		return tiledLayer;
