@@ -1,4 +1,11 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.gamelogic;
+
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class TowerDefenseGameState {
 
@@ -7,23 +14,19 @@ public class TowerDefenseGameState {
 	public int playerLives = 20;
 	public int playerScore = 0;
 
-	TurretImpl[] turrets;
-	int numTurrets;
+	Hashtable turrets = new Hashtable(); // turrets with unique id for collision
+	Vector minions = new Vector();
 
-	MinionImpl[] minions;
-	int numMinions;
+	boolean isWave = false;
+	boolean isGameover = false;
+	boolean isVictory = false;
+	
+	int numberOfMinions = 0;
+	long minionSpawnCooldown = 0; // milliseconds
+	
+	boolean hasMinionCollided = false;
 
-	long timeWaveStart;
-	long timeSpawnCondition; // minion spawning cooldown time
-
-	int g_GameState;
-
-	boolean isWave;
-	boolean isGameover;
-	boolean isVictory;
-	boolean isThereAnyMinionAlive;
-
-	int currWaveNumber;
+	int currWaveNumber = 0;
 	int currWaveMinionHealth;
-	int currWaveMinionReward;
+	int currWaveMinionReward;	
 }
