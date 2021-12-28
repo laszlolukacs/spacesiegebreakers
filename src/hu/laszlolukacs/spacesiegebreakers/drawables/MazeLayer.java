@@ -1,10 +1,14 @@
-package hu.laszlolukacs.spacesiegebreakers.gamelogic;
+/**
+ * See LICENSE for details.
+ */
+
+package hu.laszlolukacs.spacesiegebreakers.drawables;
 
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.Layer;
 import javax.microedition.lcdui.game.TiledLayer;
 
-public class MazeImpl {
+public class MazeLayer implements MicroEditionLayerProvider {
 	
 	private static final int MAZE_WIDTH = 16;
 	private static final int MAZE_HEIGHT = 17;
@@ -32,46 +36,12 @@ public class MazeImpl {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		};
 	
-	/**
-	 * This array indicates where could be the turrets and the minions located within the maze.
-	 */
-	private final byte[] terrainHeight = new byte[] { // 16x17
-			0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-			0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-			0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
-			0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
-			0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
-			0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-			0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-		};
-	
 	private final Image terrainTiles;
 	private final Layer terrainLayer;
 	
-	public MazeImpl(final Image terrainTiles) {
+	public MazeLayer(final Image terrainTiles) {
 		this.terrainTiles = terrainTiles;
-		this.terrainLayer = this.createTiledLayer(this.terrainTiles);
-	}
-
-	public byte getHeightAt(int x, int y) {
-		// limits+validates the input
-		x = Math.max(0, x);
-		x = Math.min(x, MazeImpl.MAZE_WIDTH - 1);
-		
-		y = Math.max(0,  y);
-		y = Math.min(y, MazeImpl.MAZE_HEIGHT - 1);
-		
-		return this.terrainHeight[y * MazeImpl.MAZE_WIDTH + x];
+		this.terrainLayer = createTiledLayer(this.terrainTiles);
 	}
 
 	public Layer getDrawableLayer() {
