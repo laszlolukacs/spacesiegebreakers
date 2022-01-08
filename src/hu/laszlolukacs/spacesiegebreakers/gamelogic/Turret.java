@@ -41,7 +41,7 @@ public class Turret implements Updateable {
 	        	Minion minion = (Minion) e.nextElement();
 	        	
 				if (minion.isAlive() && isMinionInRange(minion)) {
-					minion.hit(attackDamage);
+					minion.takeHit(attackDamage);
 					attackCooldownCounter = attackRate;
 					return true;
 				}

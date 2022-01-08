@@ -7,42 +7,49 @@ package hu.laszlolukacs.spacesiegebreakers.gamelogic;
 import hu.laszlolukacs.spacesiegebreakers.Updateable;
 import hu.laszlolukacs.spacesiegebreakers.drawables.MicroEditionLayerProvider;
 import hu.laszlolukacs.spacesiegebreakers.drawables.MinionSprite;
-import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteCache;
+import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteAdapterFactory;
+import hu.laszlolukacs.spacesiegebreakers.utils.Direction2D;
+import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 
 public class Minion implements Updateable, DrawableContainer {
 
 	private static final int MINION_START_X = 40;
 	private static final int MINION_START_Y = -20;
 
-	int hitpoints, maxHitpoints = 10;
+	private final int maxHitpoints;
+	private int hitpoints;
 
-	int x, y, startx, starty; // pos
-	int velocity = 1; // px/movePeriodTime
-	int direction = Direction.DOWN;
-	int movePeriodTime = 33; // ms
-	int currentPeriodTime = 0; // ms
+	private final int startX, startY; // pos
+	int x, y; // pos
+
+	private static final int MINION_MOVE_PERIOD_TIME = 33; // ms
+	private final GameTimer movementTimer = new GameTimer(MINION_MOVE_PERIOD_TIME);
+	private int velocity = 1; // px/movePeriodTime
+	private int direction = Direction2D.DOWN;
 
 	private MinionSprite drawable;
 
-	private Minion() {
-	}
-
 	private Minion(int x, int y, int hitpoints) {
-		this.x = startx = x;
-		this.y = starty = y;
-		this.hitpoints = maxHitpoints = hitpoints;
-		drawable = (MinionSprite) SpriteCache.getSprite(1);
+		this.x = this.startX = x;
+		this.y = this.startY = y;
+		this.hitpoints = this.maxHitpoints = hitpoints;
+		drawable = (MinionSprite) SpriteAdapterFactory.createMinionSprite(1);
 	}
 
 	public static Minion spawn(int hitpoints) {
-		return new Minion(MINION_START_X, MINION_START_Y, hitpoints);
+		Minion minion = new Minion(MINION_START_X, MINION_START_Y, hitpoints);
+		minion.movementTimer.setEnabled(true);
+		return minion;
 	}
 
 	public void update(long delta) {
 		if (isAlive()) {
-			currentPeriodTime += delta;
-			direction = changeOrientation();
-			move();
+			movementTimer.update(delta);
+			if (movementTimer.isThresholdReached()) {
+				direction = changeOrientation();
+				move();
+			}
+
 			drawable.setPosition(x, y);
 		} else {
 			drawable.updateAnimation(delta);
@@ -53,7 +60,7 @@ public class Minion implements Updateable, DrawableContainer {
 		return hitpoints > 0;
 	}
 
-	public void hit(int damage) {
+	public void takeHit(int damage) {
 		if (!isAlive()) {
 			throw new IllegalStateException("The minion is already dead");
 		}
@@ -65,44 +72,29 @@ public class Minion implements Updateable, DrawableContainer {
 		}
 	}
 
-	void setPosition(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public int getX() {
+		return x;
 	}
 
-	private boolean canMove() {
-		if (currentPeriodTime - movePeriodTime > 0) {
-			currentPeriodTime -= movePeriodTime;
-			return true;
-		}
-
-		return false;
+	public int getY() {
+		return y;
 	}
 
 	private void move() {
-		if (canMove()) {
-			switch (direction) {
-			case Direction.LEFT:
-				x -= velocity;
-				break;
-			case Direction.RIGHT:
-				x += velocity;
-				break;
-			case Direction.UP:
-				y -= velocity;
-				break;
-			case Direction.DOWN:
-				y += velocity;
-				break;
-			}
+		switch (direction) {
+		case Direction2D.LEFT:
+			x -= velocity;
+			break;
+		case Direction2D.RIGHT:
+			x += velocity;
+			break;
+		case Direction2D.UP:
+			y -= velocity;
+			break;
+		case Direction2D.DOWN:
+			y += velocity;
+			break;
 		}
-	}
-
-	static final class Direction {
-		public static final int LEFT = 1;
-		public static final int RIGHT = 2;
-		public static final int UP = 4;
-		public static final int DOWN = 8;
 	}
 
 	private int changeOrientation() {
@@ -110,55 +102,55 @@ public class Minion implements Updateable, DrawableContainer {
 		case 0:
 			switch (y) {
 			case 0:
-				return Direction.DOWN;
+				return Direction2D.DOWN;
 			case 70:
-				return Direction.RIGHT;
+				return Direction2D.RIGHT;
 			case 110:
-				return Direction.DOWN;
+				return Direction2D.DOWN;
 			case 150:
-				return Direction.RIGHT;
+				return Direction2D.RIGHT;
 			}
 
 			break;
 		case 40:
 			switch (y) {
 			case -20:
-				return Direction.DOWN;
+				return Direction2D.DOWN;
 			case 0:
-				return Direction.LEFT;
+				return Direction2D.LEFT;
 			case 40:
-				return Direction.RIGHT;
+				return Direction2D.RIGHT;
 			case 70:
-				return Direction.UP;
+				return Direction2D.UP;
 			}
 
 			break;
 		case 80:
 			switch (y) {
 			case 0:
-				return Direction.UP;
+				return Direction2D.UP;
 			case -20:
 				// minion has collided with the objective
 				respawn();
-				return Direction.DOWN;
+				return Direction2D.DOWN;
 			}
 
 			break;
 		case 100:
 			switch (y) {
 			case 40:
-				return Direction.DOWN;
+				return Direction2D.DOWN;
 			case 110:
-				return Direction.LEFT;
+				return Direction2D.LEFT;
 			}
 
 			break;
 		case 140:
 			switch (y) {
 			case 0:
-				return Direction.LEFT;
+				return Direction2D.LEFT;
 			case 150:
-				return Direction.UP;
+				return Direction2D.UP;
 			}
 
 			break;
@@ -171,8 +163,8 @@ public class Minion implements Updateable, DrawableContainer {
 	 * Teleports the minion to its starting point.
 	 */
 	private void respawn() {
-		x = startx;
-		y = starty;
+		x = startX;
+		y = startY;
 	}
 
 	public MicroEditionLayerProvider getDrawable() {

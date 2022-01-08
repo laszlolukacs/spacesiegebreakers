@@ -10,20 +10,24 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.LayerManager;
+import javax.microedition.lcdui.game.Sprite;
 
 import hu.laszlolukacs.spacesiegebreakers.Game;
 import hu.laszlolukacs.spacesiegebreakers.drawables.MazeLayer;
-import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteCache;
+import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteAdapterFactory;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseEventHandler;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseGame;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseGameState;
-import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefensePlayerActions;
+import hu.laszlolukacs.spacesiegebreakers.ui.GameControlButton;
 import hu.laszlolukacs.spacesiegebreakers.ui.Hud;
+import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
 public class GameScene extends BaseMicroEditionScene
 		implements Scene, TowerDefenseEventHandler {
 	public static final String TAG = "GameScene";
+
+	private static final long INPUT_DEBOUNCE_TIME = 66; // ms => 2 frames
 
 	private final Display dgDisplay;
 	private final Graphics g;
@@ -35,18 +39,23 @@ public class GameScene extends BaseMicroEditionScene
 	private Image terrainTilesImage;
 	private Image minionSprites;
 	private Image minionExplosionFrames;
+	private Image turretPlaceholderImage;
 
 	private Hud hud;
 	private MazeLayer maze;
 	private LayerManager layerManager;
+	private Sprite turretPlaceholderSprite;
+
+	private GameTimer inputTimer = new GameTimer(INPUT_DEBOUNCE_TIME);
+	private boolean isBuildMode = false;
 
 	public GameScene(final Display display) {
 		super();
 		this.dgDisplay = display;
 		this.g = super.getGraphics();
-		this.hud = new Hud(super.getGraphics(), textRenderer, screen,
-				gameState);
 		this.layerManager = new LayerManager();
+		this.hud = new Hud(super.getGraphics(), screen, textRenderer,
+				gameState);
 	}
 
 	public void init() {
@@ -55,15 +64,14 @@ public class GameScene extends BaseMicroEditionScene
 			loadImages();
 			this.hud.init();
 			this.maze = new MazeLayer(this.terrainTilesImage);
+			SpriteAdapterFactory.setLayerManager(layerManager);
+			SpriteAdapterFactory.setMinionImage(minionSprites);
+			SpriteAdapterFactory.setExplosionImage(minionExplosionFrames);
+			createTurretPlaceholderSprite();
 			layerManager.append(maze.getDrawableLayer());
-			SpriteCache.setLayerManager(layerManager);
-			SpriteCache.setImage(minionSprites);
-			SpriteCache.setExplosion(minionExplosionFrames);
 			if (Log.getEnabled()) {
 				Log.i(TAG, "Loading complete.");
 			}
-			
-			game.startNewWave();
 		} catch (Exception ex) {
 			if (Log.getEnabled()) {
 				Log.e(TAG, "Failed to load the resources, reason: "
@@ -80,25 +88,118 @@ public class GameScene extends BaseMicroEditionScene
 			this.terrainTilesImage = Image.createImage("/legacy/map_tiles.png");
 			this.minionSprites = Image.createImage("/legacy/minions.png");
 			this.minionExplosionFrames = Image.createImage("/legacy/fx.png");
+			this.turretPlaceholderImage = Image
+					.createImage("/legacy/placeholder.png");
 			if (Log.getEnabled()) {
-				Log.i(TAG, "GameScene image resources loaded.");
+				Log.i(TAG, "Image resources have been loaded.");
 			}
 		} catch (IOException ioex) {
 			if (Log.getEnabled()) {
-				Log.e(TAG, "Failed to load the image resources, reason: "
+				Log.e(TAG, "Failed to load the image resource, reason: "
 						+ ioex.getMessage());
 				ioex.printStackTrace();
 			}
 		}
 	}
 
-	public void update(final long delta) {
-		this.getInput();
-		game.update(delta);
+	private void createTurretPlaceholderSprite() {
+		turretPlaceholderSprite = new Sprite(turretPlaceholderImage, 10, 10);
+		turretPlaceholderSprite.setVisible(false);
+		// turretPlaceholderSprite.defineReferencePixel(5, 5);
+		layerManager.append(turretPlaceholderSprite);
 	}
 
-	private void getInput() {
-		int keyStates = super.getKeyStates();
+	public void update(final long delta) {
+		getInput(delta);
+		game.update(delta);
+		hud.update(delta);
+	}
+
+	private void getInput(final long delta) {
+		inputTimer.update(delta);
+		if (inputTimer.isThresholdReached()) {
+			int keyStates = super.getKeyStates();
+
+			if ((keyStates & LEFT_PRESSED) != 0) {
+				onLeftPressed();
+			} else if ((keyStates & UP_PRESSED) != 0) {
+				onUpPressed();
+			} else if ((keyStates & RIGHT_PRESSED) != 0) {
+				onRightPressed();
+			} else if ((keyStates & DOWN_PRESSED) != 0) {
+				onDownPressed();
+			} else if ((keyStates & FIRE_PRESSED) != 0) {
+				onFirePressed();
+			}
+
+			inputTimer.setEnabled(keyStates != 0);
+			inputTimer.reset();
+		}
+	}
+
+	private void onLeftPressed() {
+		if (!isBuildMode) {
+			hud.selectPreviousControlButton();
+		} else if (turretPlaceholderSprite.getX() > 0) {
+			moveTurretPlaceholderSprite(-5, 0);
+		}
+	}
+
+	private void onUpPressed() {
+		if (isBuildMode && turretPlaceholderSprite.getY() > 0) {
+			moveTurretPlaceholderSprite(0, -5);
+		}
+	}
+
+	private void onRightPressed() {
+		if (!isBuildMode) {
+			hud.selectNextControlButton();
+		} else if (turretPlaceholderSprite.getX() < (160 - 10)) {
+			moveTurretPlaceholderSprite(5, 0);
+		}
+	}
+
+	private void onDownPressed() {
+		if (isBuildMode && turretPlaceholderSprite.getY() < (170 - 10)) {
+			moveTurretPlaceholderSprite(0, 5);
+		}
+	}
+
+	private void moveTurretPlaceholderSprite(int deltaX, int deltaY) {
+		turretPlaceholderSprite.setPosition(
+				turretPlaceholderSprite.getX() + deltaX,
+				turretPlaceholderSprite.getY() + deltaY);
+	}
+
+	private void onFirePressed() {
+		if (!isBuildMode) {
+			switch (hud.getCurrentButtonIndex()) {
+			case GameControlButton.BUILD_TURRET:
+				enterBuildMode();
+				break;
+			case GameControlButton.NEW_WAVE:
+				game.startNewWave();
+				break;
+			case GameControlButton.QUIT:
+				quitGame();
+				break;
+			default:
+				break;
+			}
+		} else {
+			buildTurret();
+		}
+	}
+
+	private void enterBuildMode() {
+		isBuildMode = true;
+		turretPlaceholderSprite.setVisible(isBuildMode);
+	}
+
+	private void buildTurret() {
+		isBuildMode = false;
+		turretPlaceholderSprite.setVisible(isBuildMode);
+		// TODO: build a turret
 	}
 
 	public void render(final long delta) {
@@ -152,5 +253,10 @@ public class GameScene extends BaseMicroEditionScene
 
 	public void onWaveComplete() {
 		// TODO: display message here
+	}
+
+	private void quitGame() {
+		Scene nextScene = SceneFactory.createSceneByKey(SceneFactory.MAIN_MENU);
+		Game.setScene(nextScene);
 	}
 }

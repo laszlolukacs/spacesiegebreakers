@@ -14,8 +14,8 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 
 	public static final String TAG = "TowerDefenseGame";
 
-	private static final long MINION_SPAWN_RATE = 500; // milliseconds
 	private static final int MAX_NUMBER_OF_MINIONS = 20;
+	static final long MINION_SPAWN_RATE = 500; // milliseconds
 
 	private final TowerDefenseEventHandler eventHandler;
 	private TowerDefenseGameState gameState;
@@ -31,16 +31,17 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 
 	public void update(long delta) {
 		if (canTick()) {
-			if (gameState.minionSpawnCooldown > 0) {
-				gameState.minionSpawnCooldown -= delta;
+			gameState.elapsedTime += delta;
+			gameState.minionSpawnTimer.update(delta);
+			if (canSpawnMinion()) {
+				spawnMinion();
 			}
 
-			spawnMinion(gameState.currWaveMinionHealth);
 			updateMinions(delta);
 			if (!isPlayerAlive()) {
 				// Game Over
 				onDefeat();
-			} else if (gameState.hasMinionCollided 
+			} else if (gameState.hasMinionCollided
 					&& gameState.playerLives < 6) {
 				// Defeat is imminent
 				onLowLives();
@@ -55,6 +56,10 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 
 	public void startNewWave() {
 		if (!gameState.isWave) {
+			if (gameState.startTime == 0) {
+				gameState.startTime = System.currentTimeMillis();
+			}
+
 			cleanUpDeadMinions();
 			gameState.numberOfMinions = 0;
 			gameState.currWaveNumber++;
@@ -90,22 +95,23 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 		}
 	}
 
-	private void spawnMinion(int health) {
-		if (canSpawnMinion()) {
-			Log.i(TAG,
-					"Spawning minion (Level " + gameState.currWaveNumber + ", "
-							+ health + " hp, " + gameState.numberOfMinions + "/"
-							+ MAX_NUMBER_OF_MINIONS + ")");
-			Minion minion = Minion.spawn(health);
-			gameState.minions.addElement(minion);
-			gameState.numberOfMinions++;
-			gameState.minionSpawnCooldown = MINION_SPAWN_RATE;
-		}
+	private void spawnMinion() {
+		Log.i(TAG,
+				"Spawning minion (Level " + gameState.currWaveNumber + ", "
+						+ gameState.currWaveMinionHealth + " hp, "
+						+ gameState.numberOfMinions + "/"
+						+ MAX_NUMBER_OF_MINIONS + ")");
+		Minion minion = Minion.spawn(gameState.currWaveMinionHealth);
+		gameState.minions.addElement(minion);
+		gameState.numberOfMinions++;
+		gameState.minionSpawnTimer.reset();
+		boolean spawnTimerEnabled = gameState.numberOfMinions != MAX_NUMBER_OF_MINIONS;
+		gameState.minionSpawnTimer.setEnabled(spawnTimerEnabled);
 	}
 
 	private boolean canSpawnMinion() {
-		return (MAX_NUMBER_OF_MINIONS - gameState.numberOfMinions) > 0
-				&& gameState.minionSpawnCooldown <= 0;
+		return (gameState.numberOfMinions < MAX_NUMBER_OF_MINIONS
+				&& gameState.minionSpawnTimer.isThresholdReached());
 	}
 
 	private void updateMinions(final long delta) {
@@ -154,7 +160,7 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 		if (eventHandler != null) {
 			eventHandler.onLowLives();
 		}
-		
+
 		gameState.hasMinionCollided = false;
 	}
 
