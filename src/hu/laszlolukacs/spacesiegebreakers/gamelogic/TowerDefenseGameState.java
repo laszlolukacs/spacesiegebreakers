@@ -7,8 +7,13 @@ package hu.laszlolukacs.spacesiegebreakers.gamelogic;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
+
 public class TowerDefenseGameState {
 
+	long startTime; // milliseconds
+	long elapsedTime; // milliseconds
+	
 	// the player stats
 	public int playerCredits = 40;
 	public int playerLives = 20;
@@ -22,7 +27,7 @@ public class TowerDefenseGameState {
 	boolean isVictory = false;
 	
 	int numberOfMinions = 0;
-	long minionSpawnCooldown = 0; // milliseconds
+	GameTimer minionSpawnTimer = new GameTimer(TowerDefenseGame.MINION_SPAWN_RATE);
 	
 	boolean hasMinionCollided = false;
 
