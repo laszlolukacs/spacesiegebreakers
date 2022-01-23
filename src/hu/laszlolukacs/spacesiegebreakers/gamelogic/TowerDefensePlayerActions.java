@@ -6,6 +6,6 @@ package hu.laszlolukacs.spacesiegebreakers.gamelogic;
 
 public interface TowerDefensePlayerActions {
 	
-	void buildTurret(int x, int y);
+	boolean buildTurret(int x, int y);
 	void startNewWave();
 }

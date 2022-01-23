@@ -4,10 +4,11 @@
 
 package hu.laszlolukacs.spacesiegebreakers.drawables;
 
+import javax.microedition.lcdui.game.Layer;
+
 public interface SpriteAdapter {
 	
-	boolean isActive();
-	void setActive(final boolean active);
+	Layer getSprite();
 	void setVisible(final boolean visible);
 	void setPosition(final int x, final int y);
 }
