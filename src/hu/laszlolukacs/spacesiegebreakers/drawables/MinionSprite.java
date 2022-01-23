@@ -8,18 +8,17 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.Layer;
 import javax.microedition.lcdui.game.Sprite;
 
-public class MinionSprite
-		implements MicroEditionLayerProvider, AnimatedSpriteAdapter {
+import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
+
+public class MinionSprite implements AnimatedSpriteAdapter {
 
 	private static final int MINION_SIZE_PX = 20;
-
-	private boolean isActive = false;
 
 	private Sprite explosionSprite;
 	private Sprite minionSprite;
 
 	private final int animationPeriodTime = 33; // ms
-	private int currentPeriodTime = 0; // ms
+	private GameTimer animationTimer = new GameTimer(animationPeriodTime);
 	private int animationFrameIndex = 0;
 
 	public MinionSprite(final Image minionSprites, 
@@ -32,7 +31,7 @@ public class MinionSprite
 	private void buildMinionSprite(final Image minionSpritesImage,
 			final int waveNumber) {
 		minionSprite = new Sprite(minionSpritesImage, MINION_SIZE_PX, MINION_SIZE_PX);
-		
+
 		// workaround for the 5 available sprites for the 10 waves
 		int spriteIndex = (waveNumber - 1 < 5) 
 				? waveNumber - 1
@@ -50,16 +49,8 @@ public class MinionSprite
 		explosionSprite.setVisible(false);
 	}
 
-	public Layer getDrawableLayer() {
+	public Layer getSprite() {
 		return minionSprite;
-	}
-
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public void setActive(boolean active) {
-		this.isActive = active;
 	}
 
 	public void setVisible(boolean visible) {
@@ -68,24 +59,31 @@ public class MinionSprite
 
 	public void setPosition(int x, int y) {
 		minionSprite.setPosition(x, y);
+		explosionSprite.setPosition(x, y);
+	}
+	
+	public Layer getAnimatedSprite() {
+		return explosionSprite;
 	}
 
 	public void setAnimation(boolean animating) {
 		explosionSprite.setVisible(animating);
+		animationTimer.setEnabled(animating);
 	}
 
 	public void updateAnimation(long delta) {
 		if (explosionSprite.isVisible() && animationFrameIndex < 5) {
-			currentPeriodTime += delta;
-			if (currentPeriodTime > animationPeriodTime) {
+			animationTimer.update(delta);
+			if (animationTimer.isThresholdReached()) {
 				explosionSprite.nextFrame();
 				animationFrameIndex++;
 				if (animationFrameIndex == 5) {
 					explosionSprite.setVisible(false);
+					animationTimer.setEnabled(false);
 					animationFrameIndex = 0;
 				}
 
-				currentPeriodTime = 0;
+				animationTimer.reset();
 			}
 		}
 	}

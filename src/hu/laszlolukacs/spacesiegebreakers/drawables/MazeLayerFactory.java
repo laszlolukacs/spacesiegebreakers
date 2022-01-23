@@ -8,15 +8,16 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.Layer;
 import javax.microedition.lcdui.game.TiledLayer;
 
-public class MazeLayer implements MicroEditionLayerProvider {
+public class MazeLayerFactory {
 	
 	private static final int MAZE_WIDTH = 16;
 	private static final int MAZE_HEIGHT = 17;
+	private static final int MAZE_TILE_SIZE = 10; // pixels
 	
 	/**
 	 * This array indicates which sprite tiles should be used to draw the maze. 
 	 */
-	private final byte[] terrainTileIndices = new byte[] { // 16x17
+	private static final byte[] terrainTileIndices = new byte[] { // 16x17
 			0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0,
@@ -36,22 +37,13 @@ public class MazeLayer implements MicroEditionLayerProvider {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		};
 	
-	private final Image terrainTiles;
-	private final Layer terrainLayer;
-	
-	public MazeLayer(final Image terrainTiles) {
-		this.terrainTiles = terrainTiles;
-		this.terrainLayer = createTiledLayer(this.terrainTiles);
-	}
-
-	public Layer getDrawableLayer() {
-		return this.terrainLayer;
+	private MazeLayerFactory() {
 	}
 	
-	private Layer createTiledLayer(Image terrainTiles) {
+	public static Layer createTiledLayer(Image terrainTiles) {
 		final int width = MAZE_WIDTH;
 		final int height = MAZE_HEIGHT;
-		final TiledLayer tiledLayer = new TiledLayer(width, height, terrainTiles, 10, 10);
+		final TiledLayer tiledLayer = new TiledLayer(width, height, terrainTiles, MAZE_TILE_SIZE, MAZE_TILE_SIZE);
 		for (int i = 0; i < terrainTileIndices.length; i++) {
 			int column = i % width;
 			int row = (i - column) / (height - 1);

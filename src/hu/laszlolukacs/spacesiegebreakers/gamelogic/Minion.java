@@ -5,22 +5,22 @@
 package hu.laszlolukacs.spacesiegebreakers.gamelogic;
 
 import hu.laszlolukacs.spacesiegebreakers.Updateable;
-import hu.laszlolukacs.spacesiegebreakers.drawables.MicroEditionLayerProvider;
 import hu.laszlolukacs.spacesiegebreakers.drawables.MinionSprite;
 import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteAdapterFactory;
 import hu.laszlolukacs.spacesiegebreakers.utils.Direction2D;
 import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 
-public class Minion implements Updateable, DrawableContainer {
+public class Minion implements Updateable {
 
 	private static final int MINION_START_X = 40;
 	private static final int MINION_START_Y = -20;
 
 	private final int maxHitpoints;
 	private int hitpoints;
+	private boolean hasCollided = false;
 
 	private final int startX, startY; // pos
-	int x, y; // pos
+	private int x, y; // pos
 
 	private static final int MINION_MOVE_PERIOD_TIME = 33; // ms
 	private final GameTimer movementTimer = new GameTimer(MINION_MOVE_PERIOD_TIME);
@@ -29,15 +29,15 @@ public class Minion implements Updateable, DrawableContainer {
 
 	private MinionSprite drawable;
 
-	private Minion(int x, int y, int hitpoints) {
+	private Minion(int x, int y, int hitpoints, int waveNumber) {
 		this.x = this.startX = x;
 		this.y = this.startY = y;
 		this.hitpoints = this.maxHitpoints = hitpoints;
-		drawable = (MinionSprite) SpriteAdapterFactory.createMinionSprite(1);
+		drawable = (MinionSprite) SpriteAdapterFactory.createMinionSprite(waveNumber);
 	}
 
-	public static Minion spawn(int hitpoints) {
-		Minion minion = new Minion(MINION_START_X, MINION_START_Y, hitpoints);
+	public static Minion spawn(int waveNumber, int hitpoints) {
+		Minion minion = new Minion(MINION_START_X, MINION_START_Y, hitpoints, waveNumber);
 		minion.movementTimer.setEnabled(true);
 		return minion;
 	}
@@ -65,10 +65,9 @@ public class Minion implements Updateable, DrawableContainer {
 			throw new IllegalStateException("The minion is already dead");
 		}
 
-		this.hitpoints -= damage;
+		hitpoints -= damage;
 		if (!isAlive()) {
-			drawable.setVisible(false);
-			drawable.setAnimation(true);
+			onDestruction();
 		}
 	}
 
@@ -78,6 +77,20 @@ public class Minion implements Updateable, DrawableContainer {
 
 	public int getY() {
 		return y;
+	}
+	
+	public boolean hasCollided() {
+		return hasCollided;
+	}
+	
+	public void setCollided() {
+		hasCollided = true;
+	}
+	
+	public void close() {
+		drawable.setVisible(false);
+		drawable.setAnimation(false);
+		drawable = null;
 	}
 
 	private void move() {
@@ -165,9 +178,13 @@ public class Minion implements Updateable, DrawableContainer {
 	private void respawn() {
 		x = startX;
 		y = startY;
+		hasCollided = false;
 	}
-
-	public MicroEditionLayerProvider getDrawable() {
-		return drawable;
+	
+	private void onDestruction() {
+		drawable.setVisible(false);
+		drawable.setAnimation(true);
+		movementTimer.setEnabled(false);
+		movementTimer.reset();
 	}
 }
