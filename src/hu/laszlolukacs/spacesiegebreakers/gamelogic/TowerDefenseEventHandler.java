@@ -11,5 +11,5 @@ public interface TowerDefenseEventHandler {
 	void onDefeat();
 	void onWaveComplete();
 	void onVictory();
-	void onTurretPlacementFailed();
+	void onTurretPlacementFailed(int reason);
 }

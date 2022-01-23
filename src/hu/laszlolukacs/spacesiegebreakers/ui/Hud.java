@@ -23,6 +23,10 @@ import hu.laszlolukacs.spacesiegebreakers.utils.ScreenSize;
 import hu.laszlolukacs.spacesiegebreakers.utils.TextAnchor;
 import hu.laszlolukacs.spacesiegebreakers.utils.TextRenderer;
 
+/**
+ * Draws and updates the HUD of the game (status icons, messages, control
+ * buttons, etc.).
+ */
 public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 
 	public static final String TAG = Hud.class.getName();
@@ -40,8 +44,8 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 
 	private Image hudTopBackground;
 	private Image hudBottomBackground;
-	private Image ui_HUDicons;
-	private Image ui_HUDcontrols;
+	private Image icons;
+	private Image buttons;
 
 	private final Hashtable gameControlButtons = new Hashtable();
 	private GameControlButton activeControlButton;
@@ -51,6 +55,9 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 	private int gameControlButtonsMovementDirection = Direction2D.LEFT;
 	private int gameControlButtonsTargetPosition = 0;
 	private int gameControlButtonsActualPosition = 0;
+	
+	private GameTimer messageTimer = new GameTimer(4000);
+	private String message = "";
 
 	public Hud(final Graphics g, 
 			final ScreenSize screen,
@@ -73,8 +80,8 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 		try {
 			hudTopBackground = Image.createImage("/legacy/ui_header.png");
 			hudBottomBackground = Image.createImage("/legacy/ui_tray.png");
-			ui_HUDicons = Image.createImage("/legacy/ui_icons.png");
-			ui_HUDcontrols = Image.createImage("/legacy/ui_controls.png");
+			icons = Image.createImage("/legacy/ui_icons.png");
+			buttons = Image.createImage("/legacy/ui_controls.png");
 		} catch (IOException ioex) {
 			if (Log.getEnabled()) {
 				Log.e(TAG, "Failed to load the resources, reason: "
@@ -95,7 +102,7 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 
 	private void createHudIcon(final int xCoord, final int frameIndex) {
 		final int hudIconYCoord = 2;
-		Sprite hudIcon = new Sprite(ui_HUDicons, HUD_ICON_SIZE_PX, HUD_ICON_SIZE_PX);
+		Sprite hudIcon = new Sprite(icons, HUD_ICON_SIZE_PX, HUD_ICON_SIZE_PX);
 		hudIcon.setFrame(frameIndex);
 		hudIcon.setPosition(xCoord, hudIconYCoord);
 		layerManager.append(hudIcon);
@@ -103,7 +110,7 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 
 	private void createGameControlButton(final int gameControlButtonIndex) {
 		Integer index = new Integer(gameControlButtonIndex);
-		GameControlButton button = GameControlButton.build(index, ui_HUDcontrols, screen);
+		GameControlButton button = GameControlButton.build(index, buttons, screen);
 		gameControlButtons.put(index, button);
 		layerManager.append(button.getSprite());
 	}
@@ -135,6 +142,15 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 			gameControlButtonsTimer.setEnabled(true);
 		}
 	}
+	
+	/**
+	 * Displays a temporary message to the player.
+	 */
+	public void setMessage(final String message) {
+		this.message = message;
+		this.messageTimer.reset();
+		this.messageTimer.setEnabled(true);
+	}
 
 	private void activateGameControl(final int gameControlIndex) {
 		if (gameControlIndex < GameControlButton.MIN_INDEX
@@ -155,6 +171,11 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 	public void update(final long delta) {
 		if (areGameControlButtonsMoving) {
 			updateGameControls(delta);
+		}
+		
+		messageTimer.update(delta);
+		if (messageTimer.getEnabled() && messageTimer.isThresholdReached()) {
+			messageTimer.setEnabled(false);
 		}
 	}
 
@@ -186,7 +207,10 @@ public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 		layerManager.paint(g, 0, 0);
 		renderHudText(gamestate);
 		renderUiText();
-		renderMessageText("");
+		
+		if (messageTimer.getEnabled() && !messageTimer.isThresholdReached()) {
+			renderMessageText(message);
+		}
 	}
 
 	private void renderHudBackground() {

@@ -18,11 +18,17 @@ import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteAdapterFactory;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseEventHandler;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseGame;
 import hu.laszlolukacs.spacesiegebreakers.gamelogic.TowerDefenseGameState;
+import hu.laszlolukacs.spacesiegebreakers.gamelogic.Turret;
+import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.DefeatScene;
+import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.VictoryScene;
 import hu.laszlolukacs.spacesiegebreakers.ui.GameControlButton;
 import hu.laszlolukacs.spacesiegebreakers.ui.Hud;
 import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 
+/**
+ * The {@link Scene} which handles the actual game.
+ */
 public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefenseEventHandler {
 	public static final String TAG = "GameScene";
 
@@ -30,8 +36,6 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 	private static final long FIRE_BUTTON_DEBOUNCE_TIME = 166; // ms => ~5 frames
 
 	private final Display dgDisplay;
-	private final Graphics g;
-
 	private final TowerDefenseGameState gameState = new TowerDefenseGameState();
 	private final TowerDefenseGame game = new TowerDefenseGame(gameState, this);
 
@@ -53,7 +57,6 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 	public GameScene(final Display display) {
 		super();
 		this.dgDisplay = display;
-		this.g = super.getGraphics();
 		this.layerManager = new LayerManager();
 		this.hud = new Hud(super.getGraphics(), screen, textRenderer, gameState);
 	}
@@ -201,6 +204,7 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 	private void enterBuildMode() {
 		isBuildMode = true;
 		turretPlaceholderSprite.setVisible(isBuildMode);
+		hud.setMessage("Pick a location");
 	}
 
 	private void buildTurret() {
@@ -234,14 +238,14 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 	}
 
 	public void onDefeat() {
-		Scene nextScene = SceneFactory
-				.createSceneByKey(SceneFactory.DEFEAT_SCREEN);
+		Scene nextScene = SceneFactory.createSceneByKey(SceneFactory.DEFEAT_SCREEN);
+		((DefeatScene) nextScene).setScore(gameState.playerScore);
 		Game.setScene(nextScene);
 	}
 
 	public void onVictory() {
-		Scene nextScene = SceneFactory
-				.createSceneByKey(SceneFactory.VICTORY_SCREEN);
+		Scene nextScene = SceneFactory.createSceneByKey(SceneFactory.VICTORY_SCREEN);
+		((VictoryScene) nextScene).setScore(gameState.playerScore);
 		Game.setScene(nextScene);
 	}
 
@@ -250,11 +254,11 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 	}
 
 	public void onLowLives() {
-		// TODO: display warning message here
+		hud.setMessage("WARNING! Defeat imminent");
 	}
 
 	public void onWaveComplete() {
-		// TODO: display message here
+		hud.setMessage("Wave completed!");
 	}
 
 	private void quitGame() {
@@ -262,7 +266,17 @@ public class GameScene extends BaseMicroEditionScene implements Scene, TowerDefe
 		Game.setScene(nextScene);
 	}
 
-	public void onTurretPlacementFailed() {
-		// TODO Auto-generated method stub
+	public void onTurretPlacementFailed(int reason) {
+		switch(reason) {
+		case Turret.BUILD_FAIL_REASON_NOT_ENOUGH_RESOURCES:
+			hud.setMessage("Not enough credits.");
+			break;
+		case Turret.BUILD_FAIL_REASON_INVALID_TERRAIN:
+			hud.setMessage("You must build on the platform.");
+			break;
+		case Turret.BUILD_FAIL_REASON_TURRET_COLLISION:
+		default:
+			hud.setMessage("You can't place the turret there.");
+		}
 	}
 }

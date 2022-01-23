@@ -83,6 +83,9 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 				return true;
 			} else {
 				Log.i(TAG, "Unable to place turret --- Not enough credits; required: " + turret.getCost() + ", available: " + gameState.playerCredits);
+				if (eventHandler != null) {
+					eventHandler.onTurretPlacementFailed(Turret.BUILD_FAIL_REASON_NOT_ENOUGH_RESOURCES);
+				}
 			}
 		}
 
@@ -251,22 +254,33 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 	}
 
 	private boolean canBuildTurretAt(final int x, final int y) {
-		boolean isLocationSuitable = isTurretLocationSuitableAt(x, y);
-		if (!isLocationSuitable) {
-			Log.i(TAG, "Unable to place turret --- Terrain is unsuitable @ " + x
+		boolean isTurretOnPlatform = isPlatformAt(x, y);
+		if (!isTurretOnPlatform) {
+			Log.i(TAG, "Unable to place turret --- You must build on the platform @ " + x
 					+ ";" + y);
+			if (eventHandler != null) {
+				eventHandler.onTurretPlacementFailed(Turret.BUILD_FAIL_REASON_INVALID_TERRAIN);
+			}
 		}
 
-		boolean isLocationFree = isTurretLocationFreeAt(x, y);
-		if (!isLocationFree) {
-			Log.i(TAG, "Unable to place turret --- Destination is blocked @ "
+		boolean isNoCollision = isNoCollisionAt(x, y);
+		if (!isNoCollision) {
+			Log.i(TAG, "Unable to place turret --- You can't place the turret there @ "
 					+ x + ";" + y);
+			if (eventHandler != null) {
+				eventHandler.onTurretPlacementFailed(Turret.BUILD_FAIL_REASON_TURRET_COLLISION);
+			}
 		}
 
-		return isLocationSuitable && isLocationFree;
+		return isTurretOnPlatform && isNoCollision;
 	}
 
-	private boolean isTurretLocationSuitableAt(final int x, final int y) {
+	/**
+	 * Checks whether the specified position is a valid turret placement area.
+	 * 
+	 * @return True, if it is possible to place turrets on the specified position.
+	 */
+	private boolean isPlatformAt(final int x, final int y) {
 		int x10Remainder = x % 10;
 		int y10Remainder = y % 10;
 		if ((x10Remainder != 0 && x10Remainder != 5)
@@ -291,7 +305,12 @@ public class TowerDefenseGame implements Updateable, TowerDefensePlayerActions {
 		}
 	}
 
-	private boolean isTurretLocationFreeAt(final int x, final int y) {
+	/**
+	 * Checks whether there are other turrets at the specified position.
+	 * 
+	 * @return True, if there are no other turrets at the specified position.
+	 */
+	private boolean isNoCollisionAt(final int x, final int y) {
 		return !gameState.turrets.containsKey(calculateTurretKey(x, y))
 				&& !gameState.turrets.containsKey(calculateTurretKey(x, y - 5))
 				&& !gameState.turrets.containsKey(calculateTurretKey(x, y + 5))

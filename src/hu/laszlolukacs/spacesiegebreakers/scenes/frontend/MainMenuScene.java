@@ -2,7 +2,7 @@
  * See LICENSE for details.
  */
 
-package hu.laszlolukacs.spacesiegebreakers.scenes;
+package hu.laszlolukacs.spacesiegebreakers.scenes.frontend;
 
 import java.io.IOException;
 
@@ -12,6 +12,9 @@ import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 
 import hu.laszlolukacs.spacesiegebreakers.Game;
+import hu.laszlolukacs.spacesiegebreakers.scenes.BaseMicroEditionScene;
+import hu.laszlolukacs.spacesiegebreakers.scenes.Scene;
+import hu.laszlolukacs.spacesiegebreakers.scenes.SceneFactory;
 import hu.laszlolukacs.spacesiegebreakers.ui.MenuButton;
 import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
