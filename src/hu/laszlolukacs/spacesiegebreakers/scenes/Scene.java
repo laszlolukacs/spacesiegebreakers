@@ -12,5 +12,8 @@ import hu.laszlolukacs.spacesiegebreakers.Updateable;
  */
 public interface Scene extends Updateable, Drawable {
 
+	/**
+	 * Performs the initialization of the {@link Scene}.
+	 */
 	void init();
 }

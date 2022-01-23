@@ -16,18 +16,21 @@ public final class SceneFactory {
 	public static final int GAME_SCENE = 3;
 	public static final int DEFEAT_SCREEN = 4;
 	public static final int VICTORY_SCREEN = 5;
+	
+	private SceneFactory() {
+	}
 
 	public static Scene createSceneByKey(int sceneKey) {
 		switch (sceneKey) {
-		case 1:
+		case SPLASH_SCREEN:
 			return new SplashScreenScene();
-		case 2:
+		case MAIN_MENU:
 			return new MainMenuScene();
-		case 3:
+		case GAME_SCENE:
 			return new GameScene(Game.display);
-		case 4:
+		case DEFEAT_SCREEN:
 			return new DefeatScene();
-		case 5:
+		case VICTORY_SCREEN:
 			return new VictoryScene();
 		default:
 			throw new IllegalArgumentException(

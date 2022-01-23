@@ -1,3 +1,7 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.ui;
 
 public interface GameControlButtonSelector {

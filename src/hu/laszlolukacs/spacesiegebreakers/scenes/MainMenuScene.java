@@ -6,64 +6,55 @@ package hu.laszlolukacs.spacesiegebreakers.scenes;
 
 import java.io.IOException;
 
-import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
 
 import hu.laszlolukacs.spacesiegebreakers.Game;
+import hu.laszlolukacs.spacesiegebreakers.ui.MenuButton;
+import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
+import hu.laszlolukacs.spacesiegebreakers.utils.TextAnchor;
+import hu.laszlolukacs.spacesiegebreakers.utils.Version;
 
+/**
+ * The {@link Scene} which displays the main menu.
+ */
 public class MainMenuScene extends BaseMicroEditionScene implements Scene {
+
 	public static final String TAG = "MainMenuScene";
 
-	private final Graphics g;
-	private final LayerManager layMan_Menu;
-	private Sprite[] spr_UI_menu = new Sprite[2];
+	private static final long INPUT_DEBOUNCE_TIME = 166; // ms
+	private static final int UI_CONTROL_SIZE_PX = 32;
 
-	private Image splash_Menu;
-	private Image ui_HUDcontrols;
-	private Image ui_Main;
+	private static final String START_GAME_BUTTON_LABEL = "Begin the defense";
+	private static final String QUIT_BUTTON_LABEL = "Abandon ship";
 
-	private String[] sz_MenuLabels;
-	private int menu_OptionSelectedIndex = 0;
+	private final LayerManager layerManager;
+
+	private Image mainMenuBackground;
+	private Image mainMenuHeader;
+
+	private MenuButton[] buttons = new MenuButton[2];
+	private MenuButton selectedButton = null;
+	
+	private GameTimer inputTimer = new GameTimer(INPUT_DEBOUNCE_TIME);
 
 	public MainMenuScene() {
 		super();
-		this.g = super.getGraphics();
-		layMan_Menu = new LayerManager();
+		layerManager = new LayerManager();
 	}
 
 	public void init() {
 		Log.i(TAG, "Loading main menu resources... ");
 		try {
-			this.splash_Menu = Image.createImage("/legacy/splash_menu.png");
-			this.ui_HUDcontrols = Image.createImage("/legacy/ui_controls.png");
-			this.ui_Main = Image.createImage("/legacy/ui_main.png");
-
-			// sets up the icons in the main menu
-			spr_UI_menu = new Sprite[2];
-			for (int i = 0; i < 2; i++) {
-				spr_UI_menu[i] = new Sprite(ui_HUDcontrols, 32, 32);
-				layMan_Menu.append(spr_UI_menu[i]);
-			}
-			// places and sets the main menu icons
-			spr_UI_menu[0].setPosition(screen.getCenterX() - 16,
-					screen.getCenterY() - 18);
-			spr_UI_menu[1].setPosition(screen.getCenterX() - 16,
-					screen.getCenterY() + 18);
-			spr_UI_menu[0].nextFrame();
-			spr_UI_menu[0].nextFrame();
-			spr_UI_menu[0].nextFrame();
-			spr_UI_menu[1].nextFrame();
-			spr_UI_menu[1].nextFrame();
-			spr_UI_menu[1].nextFrame();
-			spr_UI_menu[1].nextFrame();
-
-			sz_MenuLabels = new String[2];
-			sz_MenuLabels[0] = new String("Begin the defense");
-			sz_MenuLabels[1] = new String("Abandon ship");
+			mainMenuBackground = Image.createImage("/legacy/splash_menu.png");
+			mainMenuHeader = Image.createImage("/legacy/ui_main.png");
+			Image buttonFramesImage = Image.createImage("/legacy/ui_controls.png");
+			buttons[0] = createButton(MenuButton.START_GAME, buttonFramesImage);
+			buttons[1] = createButton(MenuButton.QUIT, buttonFramesImage);
+			selectButton(MenuButton.START_GAME);
 		} catch (IOException ioex) {
 			if (Log.getEnabled()) {
 				Log.e(TAG, "Failed to load the resources, reason: "
@@ -72,74 +63,126 @@ public class MainMenuScene extends BaseMicroEditionScene implements Scene {
 			}
 		}
 	}
+	
+	private MenuButton createButton(final int buttonIndex, final Image buttonFramesImage) {
+		Sprite buttonSprite = new Sprite(buttonFramesImage, UI_CONTROL_SIZE_PX,	UI_CONTROL_SIZE_PX);
+		int x = screen.getCenterX() - 16;
+		String label;
+		switch (buttonIndex) {
+		case MenuButton.START_GAME:
+			buttonSprite.setPosition(x, screen.getCenterY() - 18);
+			buttonSprite.setFrame(2);
+			label = START_GAME_BUTTON_LABEL;
+			break;
+		case MenuButton.QUIT:
+			buttonSprite.setPosition(x, screen.getCenterY() + 18);
+			buttonSprite.setFrame(4);
+			label = QUIT_BUTTON_LABEL;
+			break;
+		default:
+			label = "";
+			break;
+		}
+
+		buttonSprite.setVisible(true);
+		layerManager.append(buttonSprite);
+		return new MenuButton(buttonIndex, buttonSprite, label);
+	}
 
 	public void update(final long delta) {
-		// TODO Auto-generated method stub
-		this.getInput();
+		inputTimer.update(delta);
+		if (inputTimer.isThresholdReached()) {
+			getInput();
+		}
 	}
 
 	public void render(final long delta) {
-		// TODO Auto-generated method stub
-		this.g.drawImage(this.splash_Menu, screen.getCenterX(),
-				screen.getCenterY(), Graphics.VCENTER | Graphics.HCENTER);
-		this.g.drawImage(this.ui_Main, screen.getCenterX(), 24,
+		g.drawImage(mainMenuBackground, 
+				screen.getCenterX(),
+				screen.getCenterY(), 
+				Graphics.VCENTER | Graphics.HCENTER);
+		g.drawImage(mainMenuHeader, 
+				screen.getCenterX(), 
+				24,
 				Graphics.TOP | Graphics.HCENTER);
-		this.g.setColor(255, 255, 255);
-		this.g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD,
-				Font.SIZE_MEDIUM));
-		this.g.drawString(this.sz_MenuLabels[this.menu_OptionSelectedIndex],
-				screen.getCenterX(), screen.getCenterY() - 48,
-				Graphics.TOP | Graphics.HCENTER);
-		this.g.setFont(Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN,
-				Font.SIZE_MEDIUM));
-		this.g.drawString("Created by Laszlo Lukacs, 2010",
-				screen.getCenterX(), screen.getHeight() - 12,
-				Graphics.BOTTOM | Graphics.HCENTER);
-		this.g.drawString("v1.0", screen.getWidth(), screen.getHeight(),
-				Graphics.BOTTOM | Graphics.RIGHT);
-		layMan_Menu.paint(this.g, 0, 0);
 
+		if (selectedButton != null) {
+			textRenderer.drawNormalText(selectedButton.getDescription(),
+					screen.getCenterX(), 
+					screen.getCenterY() - 48,
+					TextAnchor.TOP | TextAnchor.HCENTER);
+		}
+
+		textRenderer.drawThinText(
+				"Created by Laszlo Lukacs, " + Version.CURRENT_VERSION_YEAR,
+				screen.getCenterX(), 
+				screen.getHeight() - 12,
+				TextAnchor.BOTTOM | TextAnchor.HCENTER);
+		textRenderer.drawThinText(Version.CURRENT_VERSION_STRING,
+				screen.getWidth(), 
+				screen.getHeight(),
+				TextAnchor.BOTTOM | TextAnchor.RIGHT);
+
+		layerManager.paint(g, 0, 0);
 		super.flushGraphics();
 	}
 
 	private void getInput() {
 		int keyStates = super.getKeyStates();
+		
+		if ((keyStates & UP_PRESSED) != 0) {
+			selectPreviousButton();
+		} else if ((keyStates & DOWN_PRESSED) != 0) {
+			selectNextButton();
+		}
+		
+		if((keyStates & FIRE_PRESSED) != 0) {
+			onButtonSelected();
+		}
+		
+		inputTimer.setEnabled(keyStates != 0);
+		inputTimer.reset();
+	}
 
-		// state for the main menu
-		if (System.currentTimeMillis() - lastTimeButtonPressed > 166) {
-			if (((keyStates & UP_PRESSED) != 0)
-					&& (menu_OptionSelectedIndex > 0)) {
-				lastTimeButtonPressed = System.currentTimeMillis();
-				Log.i(TAG, "UP_PRESSED");
-				spr_UI_menu[menu_OptionSelectedIndex].prevFrame();
-				menu_OptionSelectedIndex = 0;
-				spr_UI_menu[menu_OptionSelectedIndex].nextFrame();
-			} else if (((keyStates & DOWN_PRESSED) != 0)
-					&& (menu_OptionSelectedIndex < 1)) {
-				lastTimeButtonPressed = System.currentTimeMillis();
-				Log.i(TAG, "DOWN_PRESSED");
-				spr_UI_menu[menu_OptionSelectedIndex].prevFrame();
-				menu_OptionSelectedIndex = 1;
-				spr_UI_menu[menu_OptionSelectedIndex].nextFrame();
-			} else if (((keyStates & FIRE_PRESSED) != 0)
-					&& (System.currentTimeMillis()
-							- lastTimeButtonPressed > 300)) {
-				lastTimeButtonPressed = System.currentTimeMillis();
-				switch (menu_OptionSelectedIndex) {
-				case 0:
-					lastTimeButtonPressed = System.currentTimeMillis();
-					Log.i(TAG, "FIRE_PRESSED! - Start game selected");
-					// isTheatre = true;
-					Scene nextScene = SceneFactory
-							.createSceneByKey(SceneFactory.GAME_SCENE);
-					Game.setScene(nextScene);
-					break;
-				case 1:
-					Log.i(TAG, "FIRE_PRESSED! - Exit selected");
-					Game.quit();
-					break;
-				}
-			}
+
+	public void selectPreviousButton() {
+		if (MenuButton.MIN_INDEX < selectedButton.getIndex()) {
+			selectButton(selectedButton.getIndex() - 1);
+		}
+	}
+
+	public void selectNextButton() {
+		if (selectedButton.getIndex() < MenuButton.MAX_INDEX) {
+			selectButton(selectedButton.getIndex() + 1);
+		}
+	}
+
+	private void selectButton(final int buttonIndex) {
+		if (buttonIndex < MenuButton.MIN_INDEX
+				|| buttonIndex > MenuButton.MAX_INDEX) {
+			throw new IllegalArgumentException(
+					"buttonIndex must have a valid value from MenuButton");
+		}
+
+		if (selectedButton != null) {
+			selectedButton.setActive(false);
+		}
+
+		selectedButton = buttons[buttonIndex - 1];
+		selectedButton.setActive(true);
+	}
+	
+	private void onButtonSelected() {
+		switch (selectedButton.getIndex()) {
+		case MenuButton.START_GAME:
+			Scene nextScene = SceneFactory.createSceneByKey(SceneFactory.GAME_SCENE);
+			Game.setScene(nextScene);
+			break;
+		case MenuButton.QUIT:
+			Game.quit();
+			break;
+		default:
+			return;
 		}
 	}
 }
