@@ -12,6 +12,10 @@ import hu.laszlolukacs.spacesiegebreakers.drawables.SpriteAdapterFactory;
 import hu.laszlolukacs.spacesiegebreakers.utils.GameTimer;
 
 public class Turret implements Updateable {
+	
+	public static final int BUILD_FAIL_REASON_NOT_ENOUGH_RESOURCES = 1;
+	public static final int BUILD_FAIL_REASON_TURRET_COLLISION = 2;
+	public static final int BUILD_FAIL_REASON_INVALID_TERRAIN = 3;
 
 	private static final int TURRET_HALF_SIZE = 5; //px
 	

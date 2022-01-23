@@ -6,6 +6,7 @@ package hu.laszlolukacs.spacesiegebreakers.scenes;
 
 import hu.laszlolukacs.spacesiegebreakers.Game;
 import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.DefeatScene;
+import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.MainMenuScene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.SplashScreenScene;
 import hu.laszlolukacs.spacesiegebreakers.scenes.frontend.VictoryScene;
 

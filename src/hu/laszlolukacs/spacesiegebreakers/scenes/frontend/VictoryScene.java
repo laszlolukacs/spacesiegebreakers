@@ -76,7 +76,7 @@ public class VictoryScene extends BaseMicroEditionScene implements Scene {
 		textRenderer.drawHeaderText("Total score: " + score,
 				screen.getCenterX(), screen.getCenterY() + 16,
 				TextAnchor.TOP | TextAnchor.HCENTER);
-		textRenderer.drawHeaderText("Press 'FIRE' to begin",
+		textRenderer.drawHeaderText("Press 'FIRE' to continue",
 				screen.getCenterX(), 
 				screen.getHeight() - 48,
 				TextAnchor.BOTTOM | TextAnchor.HCENTER);
