@@ -1,3 +1,7 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.ui;
 
 import javax.microedition.lcdui.Image;

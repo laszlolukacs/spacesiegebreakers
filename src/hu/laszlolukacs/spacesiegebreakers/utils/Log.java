@@ -1,9 +1,16 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.utils;
 
 import java.util.Calendar;
 
 public class Log {
 	private static boolean isEnabled = true;
+
+	private Log() {
+	}
 
 	public static boolean getEnabled() {
 		return Log.isEnabled;
