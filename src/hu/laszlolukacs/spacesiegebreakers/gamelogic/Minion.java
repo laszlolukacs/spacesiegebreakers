@@ -14,18 +14,21 @@ public class Minion implements Updateable {
 
 	private static final int MINION_START_X = 40;
 	private static final int MINION_START_Y = -20;
+	private static final int MINION_MOVE_PERIOD_TIME = 33; // ms
 
 	private final int maxHitpoints;
 	private int hitpoints;
-	private boolean hasCollided = false;
 
-	private final int startX, startY; // pos
-	private int x, y; // pos
+	private final int startX;
+	private final int startY;
+	private int x;
+	private int y;
 
-	private static final int MINION_MOVE_PERIOD_TIME = 33; // ms
 	private final GameTimer movementTimer = new GameTimer(MINION_MOVE_PERIOD_TIME);
 	private int velocity = 1; // px/movePeriodTime
 	private int direction = Direction2D.DOWN;
+	
+	private boolean hasCollided = false;
 
 	private MinionSprite drawable;
 
@@ -52,6 +55,7 @@ public class Minion implements Updateable {
 
 			drawable.setPosition(x, y);
 		} else {
+			// updates the destruction animation
 			drawable.updateAnimation(delta);
 		}
 	}
@@ -62,13 +66,21 @@ public class Minion implements Updateable {
 
 	public void takeHit(int damage) {
 		if (!isAlive()) {
-			throw new IllegalStateException("The minion is already dead");
+			throw new IllegalStateException("This minion has already been destroyed.");
 		}
 
 		hitpoints -= damage;
 		if (!isAlive()) {
 			onDestruction();
 		}
+	}
+	
+	public int getMaxHitpoints() {
+		return maxHitpoints;
+	}
+	
+	public int getHitpoints() {
+		return hitpoints;
 	}
 
 	public int getX() {
@@ -107,6 +119,8 @@ public class Minion implements Updateable {
 		case Direction2D.DOWN:
 			y += velocity;
 			break;
+		default:
+			throw new IllegalStateException("Minion.direction has an invalid value.");
 		}
 	}
 
@@ -123,7 +137,7 @@ public class Minion implements Updateable {
 			case 150:
 				return Direction2D.RIGHT;
 			}
-
+			
 			break;
 		case 40:
 			switch (y) {

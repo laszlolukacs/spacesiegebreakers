@@ -1,6 +1,7 @@
 /**
  * See LICENSE for details.
  */
+
 package hu.laszlolukacs.spacesiegebreakers;
 
 import javax.microedition.lcdui.Display;
@@ -13,8 +14,6 @@ import hu.laszlolukacs.spacesiegebreakers.utils.Log;
  * The methods of this class allow the underlying system application management
  * software to create, start, pause, and destroy the `SpaceSiegeBreakersMIDlet`
  * application.
- * 
- * @author laszlolukacs
  */
 public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	public static final String TAG = "SpaceSiegeBreakersMIDlet";
@@ -47,14 +46,14 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	 */
 	protected void startApp() throws MIDletStateChangeException {
 		try {
-			if (this.game == null) {
+			if (game == null) {
 				Log.i(TAG, "MIDlet starting up...");
-				this.game = new Game(this, this.display);
+				game = new Game(this, display);
 			} else {
 				Log.i(TAG, "MIDlet restored.");
 			}
 
-			this.game.startLoop();
+			game.startLoop();
 		} catch (Exception e) {
 			Log.e(TAG, "Failed to start MIDlet, reason: " + e.getMessage());
 			e.printStackTrace();
@@ -75,11 +74,10 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	 * 
 	 * @see javax.microedition.midlet.MIDlet#destroyApp(boolean)
 	 */
-	protected void destroyApp(boolean unconditional)
-			throws MIDletStateChangeException {
+	protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
 		Log.i(TAG, "MIDlet shutting down...");
-		if (this.game != null) {
-			this.game.stopLoop();
+		if (game != null) {
+			game.stopLoop();
 		}
 	}
 
@@ -88,13 +86,13 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 	 */
 	public void exit() {
 		try {
-			this.destroyApp(false);
+			destroyApp(false);
 		} catch (MIDletStateChangeException e) {
 			Log.e(TAG, "Failed to destroy MIDlet, reason: " + e.getMessage());
 			e.printStackTrace();
 		}
 
-		this.notifyDestroyed();
+		notifyDestroyed();
 	}
 
 	/**

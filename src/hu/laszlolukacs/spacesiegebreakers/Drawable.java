@@ -4,6 +4,9 @@
 
 package hu.laszlolukacs.spacesiegebreakers;
 
+/**
+ * Defines the contracts for drawing into a frame.
+ */
 public interface Drawable {
 
 	/**

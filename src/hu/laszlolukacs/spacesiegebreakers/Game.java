@@ -15,8 +15,6 @@ import hu.laszlolukacs.spacesiegebreakers.utils.Log;
 /**
  * Contains the core main game loop which is intended to be executed by a
  * thread.
- * 
- * @author laszlolukacs
  */
 public class Game extends GameCanvas implements Runnable {
 	
@@ -63,7 +61,7 @@ public class Game extends GameCanvas implements Runnable {
 						Log.e(TAG, "Game thread has been interrupted, reason: "
 								+ e.getMessage());
 						e.printStackTrace();
-						this.stopLoop();
+						stopLoop();
 					}
 				}
 			} else {
@@ -74,7 +72,7 @@ public class Game extends GameCanvas implements Runnable {
 		}
 
 		Log.i(TAG, "Main game loop stopped.");
-		this.stopLoop();
+		stopLoop();
 	}
 
 	public void startLoop() {

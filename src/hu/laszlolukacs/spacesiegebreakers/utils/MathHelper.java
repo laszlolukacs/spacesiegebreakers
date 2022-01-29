@@ -1,3 +1,7 @@
+/**
+ * See LICENSE for details.
+ */
+
 package hu.laszlolukacs.spacesiegebreakers.utils;
 
 public final class MathHelper {

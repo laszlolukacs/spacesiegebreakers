@@ -4,6 +4,9 @@
 
 package hu.laszlolukacs.spacesiegebreakers;
 
+/**
+ * Defines the contracts for performing scheduled state updates.
+ */
 public interface Updateable {
 
 	/**
