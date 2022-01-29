@@ -53,7 +53,8 @@ public class SpriteAdapterFactory {
 			manager.append(mazeLayer);
 			return sprite;
 		} else {
-			throw new NullPointerException();
+			throw new NullPointerException(
+					"Either the LayerManager has not been set or one of the required Images have not been loaded.");		
 		}
 	}
 	
@@ -65,7 +66,8 @@ public class SpriteAdapterFactory {
 			manager.append(mazeLayer);
 			return sprite;
 		} else {
-			throw new NullPointerException();
+			throw new NullPointerException(
+					"Either the LayerManager has not been set or the required Image has not been loaded.");
 		}
 	}
 }

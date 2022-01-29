@@ -4,8 +4,12 @@
 
 package hu.laszlolukacs.spacesiegebreakers.drawables;
 
+/**
+ * Extends the {@link SpriteAdapter} with animation related methods.
+ */
 public interface AnimatedSpriteAdapter extends SpriteAdapter {
-	
-	void setAnimation(final boolean animating);
+
+	void setAnimation(boolean animating);
+
 	void updateAnimation(long delta);
 }

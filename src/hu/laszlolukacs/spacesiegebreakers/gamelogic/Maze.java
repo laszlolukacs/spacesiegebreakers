@@ -43,7 +43,7 @@ public class Maze {
 	
 	private int convertScreenToMazeCoordinate(final int coord) {
 		if (coord % 10 != 0) {
-			throw new IllegalArgumentException("input coordinate must a multiple of 10");
+			throw new IllegalArgumentException("The input coordinate must be a multiple of 10.");
 		}
 
 		int result = coord;

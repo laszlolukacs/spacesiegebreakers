@@ -52,8 +52,11 @@ public class MicroEditionTextRenderer implements TextRenderer {
 		drawText(monospacedFont, text, x, y, anchor);
 	}
 
-	private void drawText(final Font font, final String text, final int x,
-			final int y, final int anchor) {
+	private void drawText(final Font font, 
+			final String text, 
+			final int x,
+			final int y, 
+			final int anchor) {
 		graphics.setColor(255, 255, 255);
 		graphics.setFont(font);
 		graphics.drawString(text, x, y, anchor);
