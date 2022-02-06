@@ -9,6 +9,7 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 import hu.laszlolukacs.spacesiegebreakers.utils.Log;
+import hu.laszlolukacs.spacesiegebreakers.utils.Version;
 
 /**
  * The methods of this class allow the underlying system application management
@@ -23,7 +24,8 @@ public class SpaceSiegeBreakersMIDlet extends MIDlet {
 
 	public SpaceSiegeBreakersMIDlet() {
 		Log.i(TAG,
-				"Space Siege Breakers for J2ME, created by Laszlo Lukacs 2010, 2017");
+				"Space Siege Breakers for J2ME " + Version.CURRENT_VERSION_STRING 
+				+ ", created by Laszlo Lukacs " + Version.INITIAL_YEAR + ", " + Version.CURRENT_VERSION_YEAR);
 
 		this.display = Display.getDisplay(this);
 

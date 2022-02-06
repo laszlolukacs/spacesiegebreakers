@@ -29,7 +29,7 @@ import hu.laszlolukacs.spacesiegebreakers.utils.TextRenderer;
  */
 public class Hud implements Drawable, Updateable, GameControlButtonSelector {
 
-	public static final String TAG = Hud.class.getName();
+	public static final String TAG = "Hud";
 
 	private static final int HUD_ICON_SIZE_PX = 16;
 

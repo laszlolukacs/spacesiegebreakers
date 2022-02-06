@@ -117,7 +117,7 @@ public class MainMenuScene extends BaseMicroEditionScene implements Scene {
 		}
 
 		textRenderer.drawThinText(
-				"Created by Laszlo Lukacs, " + Version.CURRENT_VERSION_YEAR,
+				"Created by Laszlo Lukacs, " + Version.INITIAL_YEAR,
 				screen.getCenterX(), 
 				screen.getHeight() - 12,
 				TextAnchor.BOTTOM | TextAnchor.HCENTER);
