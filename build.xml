@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<project name="SpaceSiegeBreakers" default="build" basedir=".">
+
+	<property environment="env" />
+	<property name="wtk.home" value="${env.WTK_HOME}" />
+	<property name="wtk.cldc.version" value="1.0" />
+	<property name="wtk.midp.version" value="2.0" />
+
+	<property name="midlet.name" value="SpaceSiegeBreakers" />
+
+	<!-- Define the tasks. -->
+
+	<taskdef resource="antenna.properties" />
+
+	<target name="clean">
+		<delete failonerror="false" dir="classes" />
+		<delete failonerror="false" dir="bld" />
+	</target>
+
+	<target name="build">
+
+		<!-- Copy a JAD file from the MJT's Application Descriptor.
+             Caution: Ant only copies this the first time. -->
+
+		<mkdir dir="bld" />
+		<mkdir dir="classes" />
+		<copy file="Application Descriptor" tofile="bld/${midlet.name}.jad" />
+		
+		<wtkjad jadfile="bld/${midlet.name}.jad" update="true" />
+
+		<!-- Compile everything, but don't preverify (yet). -->
+
+		<wtkbuild srcdir="src" destdir="classes" debug="false" includeantruntime="false" preverify="false" />
+
+		<!-- Package everything. Most of the necessary information is
+             contained in the JAD file. Also preverify the result this
+             time. To obfuscate everything, set the corresponding
+             parameter to "true" (requires RetroGuard or ProGuard). The
+             version parameter increments the MIDlet-Version by one. -->
+
+		<wtkpackage jarfile="bld/${midlet.name}.jar" jadfile="bld/${midlet.name}.jad">
+
+			<!-- Package our newly compiled classes and the resources. -->
+
+			<fileset dir="classes" />
+			<fileset dir="res" />
+
+		</wtkpackage>
+		
+		<wtkpreverify jadfile="bld/${midlet.name}.jad" jarfile="bld/${midlet.name}.jar" />
+
+	</target>
+
+	<target name="start" depends="build">
+		<!-- Start the MIDlet suite -->
+		<wtkrun jadfile="bld/${midlet.name}.jad" device="DefaultColorPhone" wait="true" />
+	</target>
+	
+</project>
