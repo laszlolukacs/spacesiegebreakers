@@ -30,6 +30,5 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.mtj.core.nature</nature>
 		<nature>org.eclipse.mtj.core.preprocessingNature</nature>
-		<nature>org.eclipse.mtj.jmunit.jmunitNature</nature>
 	</natures>
 </projectDescription>
