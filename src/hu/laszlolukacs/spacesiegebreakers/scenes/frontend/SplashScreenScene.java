@@ -71,7 +71,7 @@ public class SplashScreenScene extends BaseMicroEditionScene implements Scene {
 				screen.getCenterX(), 
 				screen.getHeight() - 48,
 				TextAnchor.BOTTOM | TextAnchor.HCENTER);
-		textRenderer.drawThinText("Created by Laszlo Lukacs, " + Version.CURRENT_VERSION_YEAR,
+		textRenderer.drawThinText("Created by Laszlo Lukacs, " + Version.INITIAL_YEAR,
 				screen.getCenterX(), 
 				screen.getHeight() - 12,
 				TextAnchor.BOTTOM | TextAnchor.HCENTER);
